@@ -2,6 +2,6 @@
     "python.analysis.diagnosticSeverityOverrides": {
         "reportMissingImports": "none"
     },
-    "ev3devBrowser.download.include": "{src/**}",
+    "ev3devBrowser.download.include": "{src/**,drafts/**}",
     "ev3devBrowser.download.directory": "/"
 }
