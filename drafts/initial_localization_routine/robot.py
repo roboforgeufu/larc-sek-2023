@@ -626,10 +626,17 @@ class Robot:
     def pid_align(
         self,
         pid: PIDValues = PIDValues(target=30, kp=2, ki=0.001, kd=0.3),
+        sensor_function_l = None,
+        sensor_function_r = None
+
     ):
         """
         Alinha usando os dois pares (motor - sensor de cor) e controle PID.
         """
+        if sensor_function_l is None:
+            sensor_function_l =self.color_l.reflection
+        if sensor_function_r is None:
+            sensor_function_r =self.color_r.reflection
         correction_factor = 0.9
         left_error_i = 0
         right_error_i = 0
@@ -640,8 +647,8 @@ class Robot:
         has_stopped_right = False
 
         while not has_stopped_left and not has_stopped_right:
-            left_error = self.color_l.reflection() - pid.target
-            right_error = self.color_r.reflection() - (pid.target * correction_factor)
+            left_error = sensor_function_l() - pid.target
+            right_error = sensor_function_r() - (pid.target * correction_factor)
 
             left_error_i += left_error
             right_error_i += right_error
