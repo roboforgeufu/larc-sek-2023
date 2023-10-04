@@ -14,7 +14,7 @@ toph = Robot(
     wheel_distance=const.WHEEL_DIST,
     motor_r=Port.C,
     motor_l=Port.B,
-    motor_claw=Port.A,
+    #motor_claw=Port.A,
     color_l=Port.S1,
     color_r=Port.S2,
     ultra_front=Port.S4,
@@ -39,7 +39,6 @@ def chess_tower():
 
         toph.off_motors()
         toph.ev3_print("Saiu do loop:", has_seen_obstacle)
-        wait_button_pressed(toph.brick)
 
         if has_seen_obstacle:
             # Aproxima do obstáculo e lê a cor do chão
@@ -52,31 +51,78 @@ def chess_tower():
             last_color = toph.color_l.color()
             toph.ev3_print(last_color)
             toph.simple_walk(cm=-21.5, speed=30)
-            wait_button_pressed(toph.brick)
+          
 
         else:
             toph.off_motors()
-            # wait_button_pressed(toph.brick)
             toph.simple_walk(cm=-5, speed=30)
-            # wait_button_pressed(toph.brick)
-            toph.pid_align(PIDValues(target=60, kp=1.2, ki=0.002, kd=0.3))
-            wait_button_pressed(toph.brick)
+            toph.pid_align(PIDValues(target=50, kp=0.8, ki=0.003, kd=0.1), sensor_function_l=lambda: toph.color_l.rgb()[2],
+            sensor_function_r=lambda: toph.color_r.rgb()[2])
             toph.simple_walk(cm=2, speed=30)
-
             last_color = toph.color_l.color()
             ev3_print(last_color)
-            # wait_button_pressed(toph.brick)
-
             toph.simple_walk(cm=-5, speed=30)
 
         toph.ev3_print(last_color)
-        # wait_button_pressed(toph.brick)
 
         if last_color == Color.BLACK or last_color == Color.YELLOW:
             toph.simple_walk(cm=-15, speed=30)
 
         elif last_color == Color.BLUE or last_color == Color.RED:
-            break
+            if(last_color == Color.BLUE):
+                break
+            else:
+                three_colors=[]
+                three_colors.append(last_color)
+                #Cria uma lista armazenando as 3 cores do caso
+                toph.simple_walk(cm=-6,speed=30)
+                toph.pid_turn(-90)
+                toph.simple_walk(cm=6,speed=30)
+                toph.pid_align(PIDValues(target=50, kp=0.8, ki=0.003, kd=0.1), sensor_function_l=lambda: toph.color_l.rgb()[2],
+                sensor_function_r=lambda: toph.color_r.rgb()[2])
+                toph.simple_walk(cm=1,speed=20)
+                #Se movimenta para checar a cor ao lado, alinha nessa cor e logo em seguida adiciona essa cor a lista.
+                three_colors.append(toph.color_l.rgb()[2])
+                print(toph.color_l.rgb())
+                toph.simple_walk(cm=-6,speed=30)
+                toph.pid_turn(180)
+                toph.simple_walk(cm=6,speed=30)
+                toph.pid_align(PIDValues(target=50, kp=0.8, ki=0.003, kd=0.1), sensor_function_l=lambda: toph.color_l.rgb()[2],
+                sensor_function_r=lambda: toph.color_r.rgb()[2])
+                toph.simple_walk(cm=1,speed=20)
+                #Volta um pouco para tras, gira 180 e checa a outra cor na frente, e em seguida adiciona na lista.
+                #Apenas para a Toph que não possui sensores atras
+                three_colors.append(toph.color_l.rgb()[2])
+                print(toph.color_l.rgb())
+                toph.simple_walk(cm=-6,speed=30)
+                toph.pid_turn(90)
+                #Gira 90 graus para sair do caso e ir para o espaço em aberto e seguir 
+                print(three_colors)
+                if((three_colors[1] > 18 and three_colors[2] > 18) and (three_colors[1] < 25 and three_colors[2] < 25)):
+                    toph.simple_walk(cm=25,speed=30)
+                    toph.pid_turn(-90)
+                    toph.forward_while_same_reflection(reflection_diff=22,
+                        avoid_obstacles=True,
+                        left_reflection_function=lambda: toph.color_l.rgb()[2],
+                        right_reflection_function=lambda: toph.color_r.rgb()[2],)
+                if(three_colors[1] == Color.BLACK and (three_colors[2]>18 and three_colors[2]<25)):
+                    toph.simple_walk(cm=-6,speed=30)
+                    toph.pid_turn(90)
+                    toph.forward_while_same_reflection(reflection_diff=22,
+                        avoid_obstacles=True,
+                        left_reflection_function=lambda: toph.color_l.rgb()[2],
+                        right_reflection_function=lambda: toph.color_r.rgb()[2],)
+                    if((three_colors[1] > 18 and three_colors[2] > 18) and (three_colors[1] < 25 and three_colors[2] < 25)):
+                        toph.simple_walk(cm=25,speed=30)
+                        toph.pid_turn(-90)
+                        toph.forward_while_same_reflection(reflection_diff=22,
+                            avoid_obstacles=True,
+                            left_reflection_function=lambda: toph.color_l.rgb()[2],
+                            right_reflection_function=lambda: toph.color_r.rgb()[2],)
+                    
+                break
+
+                
 
         i += 1
         print(i)
@@ -87,22 +133,13 @@ def chess_tower():
 
 
 def main():
-    # chess_tower()
-
-    while True:
-        toph.pid_align(
-            PIDValues(target=50, kp=0.8, ki=0.003, kd=0.1),
-            sensor_function_l=lambda: toph.color_l.rgb()[2],
-            sensor_function_r=lambda: toph.color_r.rgb()[2],
-        )
-        wait_button_pressed(toph.brick)
+    chess_tower()
+    #while True:
+       #print(toph.color_l.rgb())
 
 
-# while True:
-# toph.ev3_print(toph.color_l.rgb())
-
-main()
-
+main()    
+#def corner_A():
 
 def calibra_pid_align():
     while True:
@@ -111,4 +148,6 @@ def calibra_pid_align():
             sensor_function_l=lambda: toph.color_l.rgb()[2],
             sensor_function_r=lambda: toph.color_r.rgb()[2],
         )
-        wait_button_pressed(toph.brick)
+
+
+
