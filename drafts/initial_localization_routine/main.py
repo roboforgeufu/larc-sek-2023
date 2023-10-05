@@ -72,54 +72,90 @@ def chess_tower():
             if(last_color == Color.BLUE):
                 break
             else:
-                three_colors=[]
-                three_colors.append(last_color)
+                three_colors_l=[]
+                three_colors_r=[]
+                three_colors_l.append(last_color)
+                three_colors_r.append(last_color)
                 #Cria uma lista armazenando as 3 cores do caso
-                toph.simple_walk(cm=-6,speed=30)
+                toph.simple_walk(cm=-4,speed=30)
                 toph.pid_turn(-90)
-                toph.simple_walk(cm=6,speed=30)
+                toph.simple_walk(cm=4,speed=30)
                 toph.pid_align(PIDValues(target=50, kp=0.8, ki=0.003, kd=0.1), sensor_function_l=lambda: toph.color_l.rgb()[2],
                 sensor_function_r=lambda: toph.color_r.rgb()[2])
                 toph.simple_walk(cm=1,speed=20)
                 #Se movimenta para checar a cor ao lado, alinha nessa cor e logo em seguida adiciona essa cor a lista.
-                three_colors.append(toph.color_l.rgb()[2])
+                three_colors_l.append(toph.color_l.rgb()[2])
+                three_colors_r.append(toph.color_r.rgb()[2])
                 print(toph.color_l.rgb())
-                toph.simple_walk(cm=-6,speed=30)
+                toph.simple_walk(cm=-4,speed=30)
                 toph.pid_turn(180)
-                toph.simple_walk(cm=6,speed=30)
+                toph.simple_walk(cm=4,speed=30)
                 toph.pid_align(PIDValues(target=50, kp=0.8, ki=0.003, kd=0.1), sensor_function_l=lambda: toph.color_l.rgb()[2],
                 sensor_function_r=lambda: toph.color_r.rgb()[2])
                 toph.simple_walk(cm=1,speed=20)
                 #Volta um pouco para tras, gira 180 e checa a outra cor na frente, e em seguida adiciona na lista.
                 #Apenas para a Toph que não possui sensores atras
-                three_colors.append(toph.color_l.rgb()[2])
+                three_colors_l.append(toph.color_l.rgb()[2])
+                three_colors_r.append(toph.color_r.rgb()[2])
                 print(toph.color_l.rgb())
+                print(toph.color_r.rgb())
                 toph.simple_walk(cm=-6,speed=30)
                 toph.pid_turn(90)
                 #Gira 90 graus para sair do caso e ir para o espaço em aberto e seguir 
-                print(three_colors)
-                if((three_colors[1] > 18 and three_colors[2] > 18) and (three_colors[1] < 25 and three_colors[2] < 25)):
-                    toph.simple_walk(cm=25,speed=30)
+                print(three_colors_l)
+                print(three_colors_r)
+                if((three_colors_l[1] > 18 and three_colors_l[2] < 30) or (three_colors_r[1] > 18 and three_colors_r[2] <= 30)):
+                    #Se é o case A onde vemos VERMELHO, AMARELO, AMARELO
+                    toph.simple_walk(cm=35,speed=30)
                     toph.pid_turn(-90)
                     toph.forward_while_same_reflection(reflection_diff=22,
                         avoid_obstacles=True,
                         left_reflection_function=lambda: toph.color_l.rgb()[2],
                         right_reflection_function=lambda: toph.color_r.rgb()[2],)
-                if(three_colors[1] == Color.BLACK and (three_colors[2]>18 and three_colors[2]<25)):
-                    toph.simple_walk(cm=-6,speed=30)
+                    #Anda um pouco para frente, faz uma gira para esquerda, e anda até ver alguma cor diferente
+                if(three_colors[1] == Color.BLACK and (three_colors[2]>18 and three_colors[2]<=25)):
+                    #Case B caso veja VERMELHO, PRETO, AMARELO. Tem de mudar preto, pelos valores respectivos
+                    toph.simple_walk(cm=-4,speed=30)
                     toph.pid_turn(90)
                     toph.forward_while_same_reflection(reflection_diff=22,
                         avoid_obstacles=True,
                         left_reflection_function=lambda: toph.color_l.rgb()[2],
                         right_reflection_function=lambda: toph.color_r.rgb()[2],)
+                    three_colors.append(last_color)
+                    #Cria uma lista armazenando as 3 cores do caso
+                    toph.simple_walk(cm=-4,speed=30)
+                    toph.pid_turn(-90)
+                    toph.simple_walk(cm=4,speed=30)
+                    toph.pid_align(PIDValues(target=50, kp=0.8, ki=0.003, kd=0.1), sensor_function_l=lambda: toph.color_l.rgb()[2],
+                    sensor_function_r=lambda: toph.color_r.rgb()[2])
+                    toph.simple_walk(cm=1,speed=20)
+                    #Se movimenta para checar a cor ao lado, alinha nessa cor e logo em seguida adiciona essa cor a lista.
+                    three_colors.append(toph.color_l.rgb()[2])
+                    print(toph.color_l.rgb())
+                    toph.simple_walk(cm=-4,speed=30)
+                    toph.pid_turn(180)
+                    toph.simple_walk(cm=4,speed=30)
+                    toph.pid_align(PIDValues(target=50, kp=0.8, ki=0.003, kd=0.1), sensor_function_l=lambda: toph.color_l.rgb()[2],
+                    sensor_function_r=lambda: toph.color_r.rgb()[2])
+                    toph.simple_walk(cm=1,speed=20)
+                    #Volta um pouco para tras, gira 180 e checa a outra cor na frente, e em seguida adiciona na lista.
+                    #Apenas para a Toph que não possui sensores atras
+                    three_colors.append(toph.color_l.rgb()[2])
+                    print(toph.color_l.rgb())
+                    toph.simple_walk(cm=-4,speed=30)
+                    toph.pid_turn(90)
+                    #Anda um pouco para fente, gira para a direita e anda até ver alguma outra cor. (Aqui logo abaixo tem de fazer uma chamada para analisar se entramos no caso A ou estamos no caso H). Mas por enquanto usamos o mesmo if usado antes
+                    #Coloquei a analise de laterais antes desse if
                     if((three_colors[1] > 18 and three_colors[2] > 18) and (three_colors[1] < 25 and three_colors[2] < 25)):
-                        toph.simple_walk(cm=25,speed=30)
+                        toph.simple_walk(cm=35,speed=30)
                         toph.pid_turn(-90)
                         toph.forward_while_same_reflection(reflection_diff=22,
                             avoid_obstacles=True,
                             left_reflection_function=lambda: toph.color_l.rgb()[2],
                             right_reflection_function=lambda: toph.color_r.rgb()[2],)
-                    
+                    else:
+                        #analise do outro caso.
+                        break
                 break
 
                 
@@ -134,8 +170,10 @@ def chess_tower():
 
 def main():
     chess_tower()
-    #while True:
-       #print(toph.color_l.rgb())
+     #while True:
+    
+        #print(toph.color_l.rgb())
+        #print(toph.color_r.rgb())
 
 
 main()    
@@ -144,10 +182,7 @@ main()
 def calibra_pid_align():
     while True:
         toph.pid_align(
-            PIDValues(target=50, kp=0.8, ki=0.003, kd=0.1),
+            PIDValues(target=50, kp=1.0, ki=0.003, kd=0.3),
             sensor_function_l=lambda: toph.color_l.rgb()[2],
             sensor_function_r=lambda: toph.color_r.rgb()[2],
         )
-
-
-
