@@ -12,12 +12,26 @@ Não devem estar nesse módulo:
 
 import math
 
-import constants as const
 from pybricks.ev3devices import ColorSensor, InfraredSensor, Motor, UltrasonicSensor
 from pybricks.hubs import EV3Brick
+from pybricks.messaging import (
+    BluetoothMailboxClient,
+    BluetoothMailboxServer,
+    NumericMailbox,
+    TextMailbox,
+)
 from pybricks.parameters import Color, Port
 from pybricks.tools import StopWatch, wait
-from utils import PIDValues, between, normalize_color, wait_button_pressed
+
+import constants as const
+from sensor_decision_trees import (
+    DecisionColorSensor,
+    s1_decision_tree,
+    s2_decision_tree,
+    s3_decision_tree,
+    s4_decision_tree,
+)
+from utils import PIDValues, between, get_hostname, normalize_color, wait_button_pressed
 
 
 class Robot:
@@ -27,28 +41,32 @@ class Robot:
 
     def __init__(
         self,
-        wheel_diameter: float,
-        wheel_distance: float,
+        wheel_diameter: float = const.WHEEL_DIAMETER,
+        wheel_distance: float = const.WHEEL_DIST,
         motor_r: Port = None,
         motor_l: Port = None,
         motor_claw: Port = None,
-        motor_sensor: Port = None,
         infra_side: Port = None,
-        infra_front: Port = None,
-        infra_front_l: Port = None,
-        infra_front_r: Port = None,
-        ultra_side: Port = None,
+        infra_back: Port = None,
         ultra_front: Port = None,
-        ultra_front_l: Port = None,
-        ultra_front_r: Port = None,
-        color_r: Port = None,
-        color_l: Port = None,
+        color_br: Port = None,
+        color_bl: Port = None,
+        color_fr: Port = None,
+        color_fl: Port = None,
+        color_front: Port = None,
         debug: bool = False,
         turn_correction: float = 1,
         color_max_value: float = 100,
+        connect_to: str = "appa",
+        is_server: bool = False,
     ) -> None:
+        # Debug
+        self.debug = debug
+
         # Brick EV3
         self.brick = EV3Brick()
+        self.name = get_hostname()
+        self.ev3_print("==", self.name.upper(), "==")
 
         # Medidas do robô
         self.wheel_diameter = wheel_diameter
@@ -59,9 +77,6 @@ class Robot:
         # Cronometro
         self.stopwatch = StopWatch()
 
-        # Debug
-        self.debug = debug
-
         # Motores
         if motor_r is not None:
             self.motor_r = Motor(motor_r)
@@ -69,34 +84,66 @@ class Robot:
             self.motor_l = Motor(motor_l)
         if motor_claw is not None:
             self.motor_claw = Motor(motor_claw)
-        if motor_sensor is not None:
-            self.motor_sensor = Motor(motor_sensor)
 
         # Sensores infra vermelhos
         if infra_side is not None:
             self.infra_side = InfraredSensor(infra_side)
-        if infra_front_l is not None:
-            self.infra_front_l = InfraredSensor(infra_front_l)
-        if infra_front_r is not None:
-            self.infra_front_r = InfraredSensor(infra_front_r)
-        if infra_front is not None:
-            self.infra_front = InfraredSensor(infra_front)
+        if infra_back is not None:
+            self.infra_front = InfraredSensor(infra_back)
 
         # Sensores ultrassonicos
-        if ultra_side is not None:
-            self.ultra_side = UltrasonicSensor(ultra_side)
-        if ultra_front_l is not None:
-            self.ultra_front_l = UltrasonicSensor(ultra_front_l)
-        if ultra_front_r is not None:
-            self.ultra_front_r = UltrasonicSensor(ultra_front_r)
         if ultra_front is not None:
             self.ultra_front = UltrasonicSensor(ultra_front)
 
         # Sensores de cor
-        if color_l is not None:
-            self.color_l = ColorSensor(color_l)
-        if color_r is not None:
-            self.color_r = ColorSensor(color_r)
+        if color_fl is not None:
+            self.color_fl = DecisionColorSensor(color_fl, s1_decision_tree)
+        if color_fr is not None:
+            self.color_fr = DecisionColorSensor(color_fr, s2_decision_tree)
+        if color_bl is not None:
+            self.color_bl = DecisionColorSensor(color_bl, s3_decision_tree)
+        if color_br is not None:
+            self.color_br = DecisionColorSensor(color_br, s4_decision_tree)
+        if color_front is not None:
+            self.color_front = ColorSensor(color_front)
+
+        if is_server:
+            # APPA
+            # setup
+            self.server = BluetoothMailboxServer()
+            self.server.wait_for_connection()
+
+            # mailboxes
+            self.mbox = TextMailbox("text", self.server)
+            self.infra_side_box = NumericMailbox("ultra", self.server)
+            self.color_front_box = NumericMailbox("color", self.server)
+            self.stop_mail_box = NumericMailbox("stop", self.server)
+
+            # handshake
+            self.mbox.wait()
+            self.brick.speaker.beep()
+
+            self.ev3_print(self.mbox.read())
+            self.brick.speaker.beep(200)
+            self.mbox.send("hello to you, client!")
+        else:
+            # MOMO
+            # setup
+            self.client = BluetoothMailboxClient()
+            self.client.connect(connect_to)
+
+            # mailboxes
+            self.mbox = TextMailbox("text", self.client)
+            self.infra_side_box = NumericMailbox("ultra", self.client)
+            self.color_front_box = NumericMailbox("color", self.client)
+            self.stop_mail_box = NumericMailbox("stop", self.client)
+
+            # handshake
+            self.brick.speaker.beep(200)
+            self.mbox.send("hello server!")
+            self.mbox.wait()
+            self.brick.speaker.beep()
+            self.ev3_print(self.mbox.read())
 
     def robot_axis_to_motor_degrees(self, axis_degrees: float):
         """
@@ -127,11 +174,11 @@ class Robot:
         self.motor_l.dc(0)
         self.motor_r.dc(0)
 
-    def ev3_print(self, *args, clear=False, **kwargs):
+    def ev3_print(self, *args, clear=False, always: bool = False, **kwargs):
         """
         Métodos para logs.
         """
-        if self.debug:
+        if self.debug or always:
             if clear:
                 wait(10)
                 self.brick.screen.clear()
@@ -149,15 +196,24 @@ class Robot:
             ki=0.001,
             kd=1,
         ),
+        left_reflection_function=None,
+        right_reflection_function=None,
     ):
         """
         Move ambos os motores (de forma individual) até que a intensidade de reflexão
         mude o suficiente (`reflection_diff`)
+
+        Retorna um booleano representando se parou por obstáculo
         """
         # self.ev3_print(self.forward_while_same_reflection.__name__)
 
-        starting_ref_r = self.color_r.reflection()
-        starting_ref_l = self.color_l.reflection()
+        if left_reflection_function is None:
+            left_reflection_function = self.color_fl.reflection
+        if right_reflection_function is None:
+            right_reflection_function = self.color_fr.reflection
+
+        starting_ref_r = right_reflection_function()
+        starting_ref_l = left_reflection_function()
 
         self.motor_l.reset_angle(0)
         self.motor_r.reset_angle(0)
@@ -167,18 +223,15 @@ class Robot:
 
         stopped_l = False
         stopped_r = False
+
+        has_seen_obstacle = False
         while not stopped_l or not stopped_r:
             if avoid_obstacles and self.ultra_front.distance() < const.OBSTACLE_DIST:
-                self.brick.speaker.beep(100)
-                self.pid_walk(10, -50)
-                self.pid_turn(90)
-                self.motor_l.reset_angle(0)
-                self.motor_r.reset_angle(0)
-                self.brick.speaker.beep(1000)
-                continue
+                has_seen_obstacle = True
+                break
 
-            diff_ref_r = self.color_r.reflection() - starting_ref_r
-            diff_ref_l = self.color_l.reflection() - starting_ref_l
+            diff_ref_r = right_reflection_function() - starting_ref_r
+            diff_ref_l = left_reflection_function() - starting_ref_l
 
             # Controle PID entre os motores
             if (not stopped_l and not stopped_r) and (speed_l == speed_r):
@@ -219,6 +272,7 @@ class Robot:
                     stopped_r = True
                 self.motor_l.hold()
         self.off_motors()
+        return has_seen_obstacle
 
     def simple_turn(
         self, angle, speed=50, look_around_function=None, motor_correction=None
@@ -284,7 +338,7 @@ class Robot:
         return reads
 
     def one_wheel_turn(self, motor: Motor, angle: int, speed: int):
-        # Curva com um motor
+        """Curva com um motor"""
         dir_sign = 1 if angle > 0 else -1
         initial_angle = motor.angle()
         while abs(motor.angle() - initial_angle) < self.robot_axis_to_motor_degrees(
@@ -294,6 +348,7 @@ class Robot:
         self.off_motors()
 
     def one_wheel_turn_till_color(self, motor: Motor, sensor_color, target_color):
+        """Curva com um motor até que um sensor alvo veja uma cor alvo"""
         motor.reset_angle(0)
         vel = 50
         while self.accurate_color(sensor_color.rgb()) != target_color:
@@ -302,6 +357,7 @@ class Robot:
         return motor.angle()
 
     def turn_till_color(self, direction, sensor_color, target_color):
+        """Curva em torno do próprio eixo até que um sensor alvo veja uma cor alvo"""
         sign = 1 if direction == "right" else -1
         vel = 50
         while self.accurate_color(sensor_color.rgb()) != target_color:
@@ -357,8 +413,8 @@ class Robot:
         angle,
         mode=1,
         pid: PIDValues = PIDValues(
-            kp=0.7,
-            ki=0.1,
+            kp=0.6,
+            ki=0.01,
             kd=0.2,
         ),
     ):
@@ -619,10 +675,16 @@ class Robot:
     def pid_align(
         self,
         pid: PIDValues = PIDValues(target=30, kp=2, ki=0.001, kd=0.3),
+        sensor_function_l=None,
+        sensor_function_r=None,
     ):
         """
         Alinha usando os dois pares (motor - sensor de cor) e controle PID.
         """
+        if sensor_function_l is None:
+            sensor_function_l = self.color_fl.reflection
+        if sensor_function_r is None:
+            sensor_function_r = self.color_fr.reflection
         correction_factor = 0.9
         left_error_i = 0
         right_error_i = 0
@@ -633,8 +695,8 @@ class Robot:
         has_stopped_right = False
 
         while not has_stopped_left and not has_stopped_right:
-            left_error = self.color_l.reflection() - pid.target
-            right_error = self.color_r.reflection() - (pid.target * correction_factor)
+            left_error = sensor_function_l() - pid.target
+            right_error = sensor_function_r() - (pid.target * correction_factor)
 
             left_error_i += left_error
             right_error_i += right_error
@@ -675,7 +737,7 @@ class Robot:
         self.stopwatch.reset()
         self.reset_both_motor_angles()
         while True:
-            sign = 1 if sensor == self.color_l else -1
+            sign = 1 if sensor == self.color_fl else -1
             if (
                 (self.accurate_color(sensor.rgb()) != Color.WHITE)
                 and (self.accurate_color(sensor.rgb()) != Color.BLACK)
@@ -750,7 +812,7 @@ class Robot:
 
             pid_correction = p_share + i_share + d_share
 
-            pid_sign = 1 if sensor == self.color_l else -1
+            pid_sign = 1 if sensor == self.color_fl else -1
             self.motor_r.run(vel + (pid_correction * pid_sign))
             self.motor_l.run(vel - (pid_correction * pid_sign))
 
@@ -765,6 +827,46 @@ class Robot:
         self.motor_l.hold()
         self.motor_r.hold()
 
+    def pid_line_follower(
+        self,
+        sensor_function=None,
+        vel=50,
+        direction="right",
+        pid=PIDValues(
+            target=35,
+            kp=3.5,
+            ki=0.05,
+            kd=10,
+        ),
+        loop_condition=None,
+    ):
+        """
+        Seguidor de linha com controle PID.
+        """
+        error = 0
+        i_share = 0.0
+
+        if sensor_function is None:
+            sensor_function = self.color_fr.reflection
+        if loop_condition is None:
+            loop_condition = lambda: True
+
+        while loop_condition():
+            prev_error = error
+            error = pid.target - sensor_function()
+
+            p_share = error * pid.kp
+            i_share = (i_share + error) * pid.ki
+            d_share = (error - prev_error) * pid.kd
+
+            pid_correction = p_share + i_share + d_share
+
+            pid_sign = 1 if direction == "right" else -1
+            self.motor_r.dc(vel + (pid_correction * pid_sign))
+            self.motor_l.dc(vel - (pid_correction * pid_sign))
+
+        self.off_motors()
+
     def line_follower_color_id(self, sensor, vel=50, array=None, break_color="None"):
         color_reads = []
         all_color_reads = []
@@ -774,7 +876,7 @@ class Robot:
         if array is None:
             array = []
         while True:
-            sign = 1 if sensor == self.color_l else -1
+            sign = 1 if sensor == self.color_fl else -1
             if (
                 (self.accurate_color(sensor.rgb()) != Color.WHITE)
                 and (self.accurate_color(sensor.rgb()) != Color.BLACK)
@@ -815,7 +917,7 @@ class Robot:
                         array.append(Color.BLUE)
                 all_color_reads.clear()
 
-            if break_color == "None" and sensor == self.color_l:
+            if break_color == "None" and sensor == self.color_fl:
                 if len(array) >= 2:
                     break
             else:
@@ -864,13 +966,6 @@ class Robot:
             if read[0] in range(min_read, min_read + acceptable_range + 1)
         ]
 
-        # self.ev3_print(
-        #     "=========", min_read, min_read + acceptable_range + 1, "========="
-        # )
-        # for read in close_reads:
-        #     self.ev3_print("CLOSE MN ALGN:", read)
-        # self.ev3_print("==================")
-
         motor_r_mean = sum(motor_r_angle for _, motor_r_angle, _ in close_reads) / len(
             close_reads
         )
@@ -879,124 +974,6 @@ class Robot:
         )
 
         self.move_both_to_target(target_l=motor_l_mean, target_r=motor_r_mean)
-
-    def pid_wall_follower(
-        self,
-        speed=30,
-        front_sensor=None,
-        side_dist=const.WALL_FOLLOWER_SIDE_DIST,
-        pid: PIDValues = PIDValues(
-            kp=0.8,
-            ki=0.001,
-            kd=0.5,
-        ),
-        max_cm=None,
-    ):
-        """Seguidor de parede com controle PID simples."""
-        self.ev3_print(self.pid_wall_follower.__name__)
-
-        if front_sensor is None:
-            front_sensor = self.ultra_front
-
-        initial_time = self.stopwatch.time()
-
-        initial_angle_r = self.motor_r.angle()
-        initial_angle_l = self.motor_l.angle()
-
-        motor_error_i = 0
-        prev_motor_error = 0
-
-        self.motor_l.reset_angle(0)
-        self.motor_r.reset_angle(0)
-
-        while True:
-            motor_diff = self.motor_r.angle() - self.motor_l.angle()
-
-            dist_diff = self.infra_side.distance() - side_dist
-
-            motor_error = motor_diff + (20 * dist_diff)
-            motor_error_i += motor_error
-            motor_error_d = motor_error - prev_motor_error
-            prev_motor_error = motor_error
-
-            pid_speed = (
-                pid.kp * motor_error + pid.ki * motor_error_i + pid.kd * motor_error_d
-            )
-
-            # self.ev3_print("IR dff:", dist_diff, "|", motor_error)
-
-            self.ev3_print(
-                "PID_WLL:",
-                motor_error,
-                motor_error_i,
-                motor_error_d,
-            )
-
-            # self.ev3_print("WLFLW t:", self.stopwatch.time() - initial_time)
-
-            # Condições de parada
-            if side_dist >= 5 and self.infra_side.distance() == 0:
-                self.brick.speaker.beep(700)
-                self.brick.speaker.beep(100)
-                return_value = 4
-                break
-            if (
-                abs(motor_error) > 100
-                and abs(motor_error_d) > 60
-                and (
-                    self.stopwatch.time() - initial_time
-                    > const.WALL_FOLLOWER_THRESHOLD_TIME
-                )
-            ):
-                return_value = 1
-                break
-
-            if max_cm is not None:
-                self.ev3_print(
-                    "MAX_CM_WLL:",
-                    abs(self.motor_l.angle() - initial_angle_l),
-                    abs(self.motor_r.angle() - initial_angle_r),
-                )
-
-            if max_cm is not None and (
-                abs(self.motor_l.angle() - initial_angle_l)
-                > self.cm_to_motor_degrees(max_cm)
-                and abs(self.motor_r.angle() - initial_angle_r)
-                > self.cm_to_motor_degrees(max_cm)
-            ):
-                return_value = 1
-                break
-            if front_sensor.distance() < 100:
-                return_value = 2
-                break
-            if (
-                self.color_l.reflection() < const.COL_REFLECTION_HOLE_MAX
-                and self.color_r.reflection() < const.COL_REFLECTION_HOLE_MAX
-            ):
-                return_value = 3
-                break
-
-            # Movimentação
-            if self.color_l.reflection() >= const.COL_REFLECTION_HOLE_MAX:
-                self.motor_l.dc(speed + pid_speed)
-            else:
-                self.motor_l.dc(0)
-
-            if self.color_r.reflection() >= const.COL_REFLECTION_HOLE_MAX:
-                self.motor_r.dc(speed - pid_speed)
-            else:
-                self.motor_r.dc(0)
-
-        self.off_motors()
-        final_diff = self.motor_r.angle() - self.motor_l.angle()
-        # self.ev3_print("final_diff:", final_diff)
-
-        self.move_both_to_target(
-            target_r=self.motor_r.angle() - final_diff / 2,
-            target_l=self.motor_l.angle() + final_diff / 2,
-        )
-
-        return return_value
 
     def move_to_distance(
         self,
@@ -1071,280 +1048,6 @@ class Robot:
         # self.ev3_print(sensor.distance())
         self.off_motors()
 
-    def hole_measurement(
-        self,
-        vel=50,
-        pid: PIDValues = PIDValues(
-            target=20,
-            kp=1,
-            ki=0.1,
-            kd=3,
-        ),
-    ):
-        pid.kp = 3
-        pid.ki = 0.1
-        pid.kd = 5
-
-        elapsed_time = 0
-        i_share = 0
-        error = 0
-        self.motor_l.reset_angle(0)
-        self.motor_r.reset_angle(0)
-        self.stopwatch.reset()
-        while self.infra_side.distance() > pid.target:
-            prev_error = error
-            error = self.motor_r.angle() - self.motor_l.angle()
-
-            p_share = error * pid.kp
-            if abs(error) < 3:
-                i_share = i_share + (error * pid.ki)
-            prev_elapsed_time = elapsed_time
-            wait(1)
-            elapsed_time = self.stopwatch.time()
-            d_share = ((error - prev_error) * pid.kd) / (
-                elapsed_time - prev_elapsed_time
-            )
-
-            pid_correction = p_share + i_share + d_share
-            self.motor_r.dc(vel - pid_correction)
-            self.motor_l.dc(vel + pid_correction)
-        self.off_motors()
-
-        WHEEL_LENGTH = (
-            const.WHEEL_DIAMETER * math.pi
-        )  # 360 graus = 1 rotacao; 1 rotacao = 17.3cm
-        degrees = (self.motor_l.angle() + self.motor_r.angle()) / 2
-        return (degrees / 360) * WHEEL_LENGTH
-
-    def duct_measurement(
-        self,
-        vel=50,
-        pid: PIDValues = PIDValues(
-            target=50,
-            kp=3,
-            ki=0.1,
-            kd=5,
-        ),
-        color_check_color=None,
-        color_check_sensor=None,
-    ):
-        elapsed_time = 0
-        i_share = 0
-        error = 0
-        self.motor_l.reset_angle(0)
-        self.motor_r.reset_angle(0)
-        self.stopwatch.reset()
-        while self.infra_side.distance() < pid.target and (
-            color_check_color is None
-            or self.accurate_color(color_check_sensor.rgb()) != color_check_color
-        ):
-            prev_error = error
-            error = self.motor_r.angle() - self.motor_l.angle()
-
-            p_share = error * pid.kp
-            if abs(error) < 3:
-                i_share = i_share + (error * pid.ki)
-            prev_elapsed_time = elapsed_time
-            wait(1)
-            elapsed_time = self.stopwatch.time()
-            d_share = ((error - prev_error) * pid.kd) / (
-                elapsed_time - prev_elapsed_time
-            )
-
-            pid_correction = p_share + i_share + d_share
-
-            self.motor_r.dc(vel - pid_correction)
-            self.motor_l.dc(vel + pid_correction)
-
-        self.motor_l.hold()
-        self.motor_r.hold()
-
-        WHEEL_LENGTH = (
-            const.WHEEL_DIAMETER * math.pi
-        )  # 360 graus = 1 rotacao; 1 rotacao = 17.3cm
-        degrees = (self.motor_l.angle() + self.motor_r.angle()) / 2
-        # erro medio de medida -> 80 graus
-        print(degrees)
-        return (degrees / 360) * WHEEL_LENGTH
-
-    def duct_measurement_new(
-        self,
-        vel=50,
-        color_check_color=None,
-        color_check_sensor=None,
-    ):
-        color_reads = []
-        num_reads = 10
-        wrong_read_perc = 0.5
-        color_count_perc = 0.5
-        self.motor_l.reset_angle(0)
-        self.motor_r.reset_angle(0)
-        while self.get_average_reading(self.infra_side.distance) < 50 and (
-            color_check_color is None
-            or self.accurate_color(color_check_sensor.rgb()) != color_check_color
-        ):
-            sign = 1 if color_check_sensor == self.color_l else -1
-            if (
-                (self.accurate_color(color_check_sensor.rgb()) != Color.WHITE)
-                and (self.accurate_color(color_check_sensor.rgb()) != Color.BLACK)
-                and (self.accurate_color(color_check_sensor.rgb()) != "None")
-            ):
-                sign = sign * (-1)
-
-            color_read = self.accurate_color(color_check_sensor.rgb())
-            color_reads.append(color_read)
-            left_multiplier = 0.33
-            right_multiplier = 0.33
-            if len(color_reads) == num_reads:
-                black_count_perc = (color_reads.count(Color.BLACK)) / num_reads
-                white_count_perc = (color_reads.count(Color.WHITE)) / num_reads
-                wrong_read_perc = black_count_perc + white_count_perc
-                color_count_perc = 1 - wrong_read_perc
-                color_reads.clear()
-
-            self.motor_r.dc(vel + (vel * wrong_read_perc * right_multiplier * sign))
-            self.motor_l.dc(vel - (vel * color_count_perc * left_multiplier * sign))
-
-        self.off_motors()
-
-        WHEEL_LENGTH = (
-            const.WHEEL_DIAMETER * math.pi
-        )  # 360 graus = 1 rotacao; 1 rotacao = 17.3cm
-        degrees = (self.motor_l.angle() + self.motor_r.angle()) / 2
-        # erro medio de medida -> 80 graus
-        # print(degrees)
-        return (degrees / 360) * WHEEL_LENGTH
-
-    def walk_to_hole(
-        self,
-        vel=50,
-        mode=1,
-        pid: PIDValues = PIDValues(
-            kp=1,
-            ki=0.1,
-            kd=3,
-        ),
-        color_check_color=None,
-        color_check_sensor=None,
-    ):
-        """
-        Modo 1: ré até deixar de ver o buraco
-        Modo 2: pra frente até ver o buraco
-        Modo 3: frente até deixar de ver (!p/ terra)
-        Modo 4: ré até ver (!p/ terra)
-        """
-        pid.kp = 3
-        pid.ki = 0.1
-        pid.kd = 5
-
-        elapsed_time = 0
-        i_share = 0.0
-        error = 0
-        self.motor_l.reset_angle(0)
-        self.motor_r.reset_angle(0)
-        self.stopwatch.reset()
-
-        if mode == 1:
-            while self.infra_side.distance() > const.WALL_SEEN_DIST and (
-                color_check_color is None
-                or self.accurate_color(color_check_sensor.rgb()) != color_check_color
-            ):
-                prev_error = error
-                error = self.motor_r.angle() - self.motor_l.angle()
-                p_share = error * pid.kp
-
-                if abs(error) < 3:
-                    i_share = i_share + (error * pid.ki)
-
-                prev_elapsed_time = elapsed_time
-                wait(1)
-                elapsed_time = self.stopwatch.time()
-                d_share = ((error - prev_error) * pid.kd) / (
-                    elapsed_time - prev_elapsed_time
-                )
-
-                pid_correction = p_share + i_share + d_share
-                self.motor_r.dc(-(vel + pid_correction))
-                self.motor_l.dc(-(vel - pid_correction))
-
-        elif mode == 2:
-            while self.infra_side.distance() < const.WALL_SEEN_DIST and (
-                color_check_color is None
-                or self.accurate_color(color_check_sensor.rgb()) != color_check_color
-            ):
-                prev_error = error
-                error = self.motor_r.angle() - self.motor_l.angle()
-                p_share = error * pid.kp
-
-                if abs(error) < 3:
-                    i_share = i_share + (error * pid.ki)
-
-                prev_elapsed_time = elapsed_time
-                wait(1)
-                elapsed_time = self.stopwatch.time()
-                d_share = ((error - prev_error) * pid.kd) / (
-                    elapsed_time - prev_elapsed_time
-                )
-
-                pid_correction = p_share + i_share + d_share
-                self.motor_r.dc(vel - pid_correction)
-                self.motor_l.dc(vel + pid_correction)
-
-        elif mode == 3:
-            while self.infra_side.distance() > const.WALL_SEEN_DIST and (
-                color_check_color is None
-                or self.accurate_color(color_check_sensor.rgb()) != color_check_color
-            ):
-                prev_error = error
-                error = self.motor_r.angle() - self.motor_l.angle()
-                p_share = error * pid.kp
-
-                if abs(error) < 3:
-                    i_share = i_share + (error * pid.ki)
-
-                prev_elapsed_time = elapsed_time
-                wait(1)
-                elapsed_time = self.stopwatch.time()
-                d_share = ((error - prev_error) * pid.kd) / (
-                    elapsed_time - prev_elapsed_time
-                )
-
-                pid_correction = p_share + i_share + d_share
-
-                bias = 1
-                if self.accurate_color(color_check_sensor.rgb()) == Color.BLACK:
-                    bias = 2
-                    self.motor_r.dc(bias * vel)
-                    self.motor_l.dc(vel)
-
-                self.motor_r.dc(vel - pid_correction)
-                self.motor_l.dc(vel + pid_correction)
-
-        elif mode == 4:
-            while self.infra_side.distance() < const.WALL_SEEN_DIST and (
-                color_check_color is None
-                or self.accurate_color(color_check_sensor.rgb()) != color_check_color
-            ):
-                prev_error = error
-                error = self.motor_r.angle() - self.motor_l.angle()
-                p_share = error * pid.kp
-
-                if abs(error) < 3:
-                    i_share = i_share + (error * pid.ki)
-
-                prev_elapsed_time = elapsed_time
-                wait(1)
-                elapsed_time = self.stopwatch.time()
-                d_share = ((error - prev_error) * pid.kd) / (
-                    elapsed_time - prev_elapsed_time
-                )
-
-                pid_correction = p_share + i_share + d_share
-                self.motor_r.dc(-(vel + pid_correction))
-                self.motor_l.dc(-(vel - pid_correction))
-
-        self.off_motors()
-
     def accurate_color(self, rgb_tuple):
         """
         Processamento de cor pra evitar os erros da leitura padrão.
@@ -1396,39 +1099,6 @@ class Robot:
         else:
             return Color.BLACK
 
-    def walk_till_duct(self, vel=50, color_check_color=None, color_check_sensor=None):
-        color_reads = []
-        num_reads = 10
-        wrong_read_perc = 0.5
-        color_count_perc = 0.5
-        while self.get_average_reading(self.infra_side.distance) > 50 and (
-            color_check_color is None
-            or self.accurate_color(color_check_sensor.rgb()) != color_check_color
-        ):
-            sign = 1 if color_check_sensor == self.color_l else -1
-            if (
-                (self.accurate_color(color_check_sensor.rgb()) != Color.WHITE)
-                and (self.accurate_color(color_check_sensor.rgb()) != Color.BLACK)
-                and (self.accurate_color(color_check_sensor.rgb()) != "None")
-            ):
-                sign = sign * (-1)
-
-            color_read = self.accurate_color(color_check_sensor.rgb())
-            color_reads.append(color_read)
-            left_multiplier = 0.33
-            right_multiplier = 0.33
-            if len(color_reads) == num_reads:
-                black_count_perc = (color_reads.count(Color.BLACK)) / num_reads
-                white_count_perc = (color_reads.count(Color.WHITE)) / num_reads
-                wrong_read_perc = black_count_perc + white_count_perc
-                color_count_perc = 1 - wrong_read_perc
-                color_reads.clear()
-
-            self.motor_r.dc(vel + (vel * wrong_read_perc * right_multiplier * sign))
-            self.motor_l.dc(vel - (vel * color_count_perc * left_multiplier * sign))
-
-        self.off_motors()
-
     def get_average_reading(self, sensor_func, num_reads=100):
         measures = []
         for _ in range(num_reads):
@@ -1436,54 +1106,6 @@ class Robot:
         mean = sum(measures) / len(measures)
         return mean
 
-    def move_until_end_of_duct(self, speed=25, inverted=False, num_reads=50):
-        print("Moving until end of duct")
-        sign = 1 if not inverted else -1
-        while (
-            self.get_average_reading(self.ultra_front.distance, num_reads=num_reads)
-            < const.DUCT_ENDS_US_DIFF
-        ):
-            self.motor_l.dc(sign * speed)
-            self.motor_r.dc(sign * -speed)
-        self.off_motors()
-
-    def move_until_beginning_of_duct(
-        self, speed=25, inverted=False, num_reads=100, time_limit=5000
-    ):
-        print("Moving until beginning of duct")
-        self.stopwatch.reset()
-        motor_mean = 0
-        sign = 1 if not inverted else -1
-        while (
-            self.get_average_reading(self.ultra_front.distance, num_reads=num_reads)
-            > const.DUCT_ENDS_US_DIFF
-            and self.stopwatch.time() < time_limit
-            and motor_mean < 150
-        ):
-            self.motor_l.dc(sign * speed)
-            self.motor_r.dc(sign * -speed)
-            motor_mean = (abs(self.motor_l.angle()) + abs(self.motor_r.angle())) / 2
-        self.off_motors()
-
     def reset_both_motor_angles(self):
         self.motor_l.reset_angle(0)
         self.motor_r.reset_angle(0)
-
-    def black_line_alignment_routine(self):
-        self.forward_while_same_reflection(speed_r=-40, speed_l=-40)
-        self.pid_align(PIDValues(target=30, kp=1.2, ki=0.002, kd=0.3))
-        self.pid_walk(cm=5, vel=-40)
-        self.forward_while_same_reflection()
-        self.pid_align(PIDValues(target=30, kp=1.2, ki=0.002, kd=0.3))
-        self.pid_walk(cm=30, vel=-40)
-        self.pid_turn(-90)
-        self.forward_while_same_reflection()
-        self.pid_align(PIDValues(target=30, kp=1.2, ki=0.002, kd=0.3))
-
-    def leaves_duct_at_correct_place(self):
-        self.pid_walk(cm=40, vel=-30)
-        self.pid_turn(90)
-        self.forward_while_same_reflection()
-        self.pid_align(PIDValues(target=30, kp=1.2, ki=0.002, kd=0.3))
-        self.pid_walk(cm=17, vel=-30)
-        self.motor_claw.run_target(300, -20)

@@ -1,3 +1,4 @@
+from pybricks.ev3devices import ColorSensor, InfraredSensor, Motor, UltrasonicSensor
 from pybricks.parameters import Color, Port, Stop
 
 
@@ -91,3 +92,25 @@ def s4_decision_tree(rgb_tuple):
                 return Color.YELLOW
             else:
                 return Color.WHITE
+
+
+class DecisionColorSensor:
+    """
+    Encapsula o sensor de cor numa classe que parametriza
+    a determinação de cores através de uma árvore de decisão
+    """
+
+    raw_sensor: ColorSensor
+
+    def __init__(self, port, decision_tree) -> None:
+        self.raw_sensor = ColorSensor(port)
+        self.decision_tree = decision_tree
+
+    def color(self):
+        return self.decision_tree(self.raw_sensor.rgb())
+
+    def reflection(self):
+        return self.raw_sensor.reflection()
+
+    def rgb(self):
+        return self.raw_sensor.rgb()
