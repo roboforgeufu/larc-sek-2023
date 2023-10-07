@@ -100,8 +100,6 @@ class DecisionColorSensor:
     a determinação de cores através de uma árvore de decisão
     """
 
-    raw_sensor: ColorSensor
-
     def __init__(self, port, decision_tree) -> None:
         self.raw_sensor = ColorSensor(port)
         self.decision_tree = decision_tree

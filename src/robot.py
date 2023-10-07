@@ -47,7 +47,7 @@ class Robot:
         motor_l: Port = None,
         motor_claw: Port = None,
         infra_side: Port = None,
-        infra_back: Port = None,
+        ultra_back: Port = None,
         ultra_front: Port = None,
         color_br: Port = None,
         color_bl: Port = None,
@@ -88,8 +88,8 @@ class Robot:
         # Sensores infra vermelhos
         if infra_side is not None:
             self.infra_side = InfraredSensor(infra_side)
-        if infra_back is not None:
-            self.infra_front = InfraredSensor(infra_back)
+        if ultra_back is not None:
+            self.ultra_brack = UltrasonicSensor(ultra_back)
 
         # Sensores ultrassonicos
         if ultra_front is not None:
@@ -367,7 +367,7 @@ class Robot:
 
     def certify_line_alignment_routine(self, motor: Motor, sensor_color, target_color):
         degrees = self.one_wheel_turn_till_color(motor, sensor_color, target_color)
-        self.pid_walk(cm=const.WHEEL_DIAMETER, vel=30)
+        self.pid_walk(cm=const.WHEEL_DIAMETER, speed=30)
         motor.reset_angle(0)
         target_motor = self.motor_r if motor == self.motor_l else self.motor_l
         target_motor.run_target(100, -220 + degrees)
@@ -547,7 +547,7 @@ class Robot:
     def pid_walk(
         self,
         cm,
-        vel=80,
+        speed=80,
     ):
         """Anda em linha reta com controle PID entre os motores."""
 
@@ -565,7 +565,7 @@ class Robot:
             motor_angle_average = (self.motor_l.angle() + self.motor_r.angle()) / 2
 
             elapsed_time, i_share, error = self.loopless_pid_walk(
-                elapsed_time, i_share, error, vel=vel
+                elapsed_time, i_share, error, vel=speed
             )
 
         self.off_motors()

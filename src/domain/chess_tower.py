@@ -1,7 +1,7 @@
 from pybricks.parameters import Color
 
-from src.robot import Robot
-from src.utils import PIDValues, wait_button_pressed
+from robot import Robot
+from utils import PIDValues, wait_button_pressed
 
 
 def chess_tower(robot: Robot):
@@ -13,8 +13,8 @@ def chess_tower(robot: Robot):
         has_seen_obstacle = robot.forward_while_same_reflection(
             reflection_diff=22,
             avoid_obstacles=False,
-            left_reflection_function=lambda: robot.color_l.rgb()[2],
-            right_reflection_function=lambda: robot.color_r.rgb()[2],
+            left_reflection_function=lambda: robot.color_fl.rgb()[2],
+            right_reflection_function=lambda: robot.color_fr.rgb()[2],
         )
         robot.ev3_print("Saiu do loop:", has_seen_obstacle)
 
@@ -28,18 +28,18 @@ def chess_tower(robot: Robot):
                 #     error,
                 # )
             robot.pid_walk(cm=4.0, speed=30)
-            last_color = robot.color_l.color()
+            last_color = robot.color_fl.color()
             robot.ev3_print(last_color)
             robot.pid_walk(cm=25.5, speed=-80)
 
         else:
             robot.pid_align(
                 PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-                sensor_function_l=lambda: robot.color_l.rgb()[2],
-                sensor_function_r=lambda: robot.color_r.rgb()[2],
+                sensor_function_l=lambda: robot.color_fl.rgb()[2],
+                sensor_function_r=lambda: robot.color_fr.rgb()[2],
             )
             robot.pid_walk(cm=1, speed=30)
-            last_color = robot.color_l.color()
+            last_color = robot.color_fl.color()
 
             robot.ev3_print(last_color)
             wait_button_pressed(robot.brick)
@@ -61,22 +61,22 @@ def chess_tower(robot: Robot):
                 robot.forward_while_same_reflection(
                     reflection_diff=22,
                     avoid_obstacles=False,
-                    left_reflection_function=lambda: robot.color_l.rgb()[2],
-                    right_reflection_function=lambda: robot.color_r.rgb()[2],
+                    left_reflection_function=lambda: robot.color_fl.rgb()[2],
+                    right_reflection_function=lambda: robot.color_fr.rgb()[2],
                 )
                 robot.pid_align(
                     PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-                    sensor_function_l=lambda: robot.color_l.rgb()[2],
-                    sensor_function_r=lambda: robot.color_r.rgb()[2],
+                    sensor_function_l=lambda: robot.color_fl.rgb()[2],
+                    sensor_function_r=lambda: robot.color_fr.rgb()[2],
                 )
                 robot.pid_walk(cm=1, speed=20)
 
-                robot.ev3_print(robot.color_l.rgb())
+                robot.ev3_print(robot.color_fl.rgb())
                 wait_button_pressed(robot.brick)
 
                 # Se movimenta para checar a cor ao lado, alinha nessa cor e logo em seguida adiciona essa cor a lista.
-                three_colors_l.append(robot.color_l.rgb()[2])
-                three_colors_r.append(robot.color_r.rgb()[2])
+                three_colors_l.append(robot.color_fl.rgb()[2])
+                three_colors_r.append(robot.color_fr.rgb()[2])
 
                 # print(robot.color_l.rgb())
                 # robot.ev3_print(robot.color_l.rgb())
@@ -87,23 +87,23 @@ def chess_tower(robot: Robot):
                 robot.forward_while_same_reflection(
                     reflection_diff=22,
                     avoid_obstacles=False,
-                    left_reflection_function=lambda: robot.color_l.rgb()[2],
-                    right_reflection_function=lambda: robot.color_r.rgb()[2],
+                    left_reflection_function=lambda: robot.color_fl.rgb()[2],
+                    right_reflection_function=lambda: robot.color_fr.rgb()[2],
                 )
                 robot.pid_align(
                     PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-                    sensor_function_l=lambda: robot.color_l.rgb()[2],
-                    sensor_function_r=lambda: robot.color_r.rgb()[2],
+                    sensor_function_l=lambda: robot.color_fl.rgb()[2],
+                    sensor_function_r=lambda: robot.color_fr.rgb()[2],
                 )
                 robot.pid_walk(cm=1, speed=20)
 
-                robot.ev3_print(robot.color_l.rgb())
+                robot.ev3_print(robot.color_fl.rgb())
                 wait_button_pressed(robot.brick)
 
                 # Volta um pouco para tras, gira 180 e checa a outra cor na frente, e em seguida adiciona na lista.
                 # Apenas para a Toph que não possui sensores atras
-                three_colors_l.append(robot.color_l.rgb()[2])
-                three_colors_r.append(robot.color_r.rgb()[2])
+                three_colors_l.append(robot.color_fl.rgb()[2])
+                three_colors_r.append(robot.color_fr.rgb()[2])
 
                 # print(robot.color_l.rgb())
                 # robot.ev3_print(robot.color_l.rgb())
@@ -124,14 +124,14 @@ def chess_tower(robot: Robot):
                     robot.forward_while_same_reflection(
                         reflection_diff=22,
                         avoid_obstacles=False,
-                        left_reflection_function=lambda: robot.color_l.rgb()[2],
-                        right_reflection_function=lambda: robot.color_r.rgb()[2],
+                        left_reflection_function=lambda: robot.color_fl.rgb()[2],
+                        right_reflection_function=lambda: robot.color_fr.rgb()[2],
                     )
                     # Anda um pouco para frente, faz uma gira para esquerda, e anda até ver alguma cor diferente
                     robot.pid_align(
                         PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-                        sensor_function_l=lambda: robot.color_l.rgb()[2],
-                        sensor_function_r=lambda: robot.color_r.rgb()[2],
+                        sensor_function_l=lambda: robot.color_fl.rgb()[2],
+                        sensor_function_r=lambda: robot.color_fr.rgb()[2],
                     )
 
                 if (three_colors_l[1] > 2 and three_colors_l[1] < 9) and (
@@ -145,30 +145,30 @@ def chess_tower(robot: Robot):
                     robot.forward_while_same_reflection(
                         reflection_diff=22,
                         avoid_obstacles=False,
-                        left_reflection_function=lambda: robot.color_l.rgb()[2],
-                        right_reflection_function=lambda: robot.color_r.rgb()[2],
+                        left_reflection_function=lambda: robot.color_fl.rgb()[2],
+                        right_reflection_function=lambda: robot.color_fr.rgb()[2],
                     )
                     robot.pid_align(
                         PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-                        sensor_function_l=lambda: robot.color_l.rgb()[2],
-                        sensor_function_r=lambda: robot.color_r.rgb()[2],
+                        sensor_function_l=lambda: robot.color_fl.rgb()[2],
+                        sensor_function_r=lambda: robot.color_fr.rgb()[2],
                     )
                     # posicao F chega no preto
-                    if (robot.color_l.rgb()[2] > 2 and robot.color_l.rgb()[2] < 9) or (
-                        robot.color_r.rgb()[2] > 2 and robot.color_r.rgb()[2] < 9
+                    if (robot.color_fl.rgb()[2] > 2 and robot.color_fl.rgb()[2] < 9) or (
+                        robot.color_fr.rgb()[2] > 2 and robot.color_fr.rgb()[2] < 9
                     ):
                         robot.pid_walk(cm=10, speed=-80)
                         robot.pid_turn(180)
                         robot.forward_while_same_reflection(
                             reflection_diff=22,
                             avoid_obstacles=False,
-                            left_reflection_function=lambda: robot.color_l.rgb()[2],
-                            right_reflection_function=lambda: robot.color_r.rgb()[2],
+                            left_reflection_function=lambda: robot.color_fl.rgb()[2],
+                            right_reflection_function=lambda: robot.color_fr.rgb()[2],
                         )
                     robot.pid_align(
                         PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-                        sensor_function_l=lambda: robot.color_l.rgb()[2],
-                        sensor_function_r=lambda: robot.color_r.rgb()[2],
+                        sensor_function_l=lambda: robot.color_fl.rgb()[2],
+                        sensor_function_r=lambda: robot.color_fr.rgb()[2],
                     )
 
                 # todos necessariamente no azul
@@ -177,13 +177,13 @@ def chess_tower(robot: Robot):
                 robot.forward_while_same_reflection(
                     reflection_diff=22,
                     avoid_obstacles=False,
-                    left_reflection_function=lambda: robot.color_l.rgb()[2],
-                    right_reflection_function=lambda: robot.color_r.rgb()[2],
+                    left_reflection_function=lambda: robot.color_fl.rgb()[2],
+                    right_reflection_function=lambda: robot.color_fr.rgb()[2],
                 )
                 robot.pid_align(
                     PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-                    sensor_function_l=lambda: robot.color_l.rgb()[2],
-                    sensor_function_r=lambda: robot.color_r.rgb()[2],
+                    sensor_function_l=lambda: robot.color_fl.rgb()[2],
+                    sensor_function_r=lambda: robot.color_fr.rgb()[2],
                 )
                 # chega na origem
                 robot.pid_walk(cm=10, speed=-80)
@@ -191,13 +191,13 @@ def chess_tower(robot: Robot):
                 robot.forward_while_same_reflection(
                     reflection_diff=22,
                     avoid_obstacles=False,
-                    left_reflection_function=lambda: robot.color_l.rgb()[2],
-                    right_reflection_function=lambda: robot.color_r.rgb()[2],
+                    left_reflection_function=lambda: robot.color_fl.rgb()[2],
+                    right_reflection_function=lambda: robot.color_fr.rgb()[2],
                 )
                 robot.pid_align(
                     PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-                    sensor_function_l=lambda: robot.color_l.rgb()[2],
-                    sensor_function_r=lambda: robot.color_r.rgb()[2],
+                    sensor_function_l=lambda: robot.color_fl.rgb()[2],
+                    sensor_function_r=lambda: robot.color_fr.rgb()[2],
                 )
                 robot.pid_walk(cm=5, speed=-50)
                 robot.pid_turn(-90)
@@ -216,7 +216,7 @@ def calibra_pid_align(robot: Robot):
     while True:
         robot.pid_align(
             PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-            sensor_function_l=lambda: robot.color_l.rgb()[2],
-            sensor_function_r=lambda: robot.color_r.rgb()[2],
+            sensor_function_l=lambda: robot.color_fl.rgb()[2],
+            sensor_function_r=lambda: robot.color_fr.rgb()[2],
         )
         wait_button_pressed(robot.brick)

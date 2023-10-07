@@ -27,9 +27,10 @@ from pybricks.parameters import Color, Port, Stop
 from pybricks.tools import wait
 from robot import Robot
 from utils import PIDValues, ev3_print, get_hostname, wait_button_pressed
-
+from domain.chess_tower import chess_tower
 
 def appa_main(appa: Robot):
+    chess_tower(appa)
     # Start
     appa.stop_mail_box.send(0)
     appa.infra_side_box.wait()
@@ -116,7 +117,7 @@ def main():
     if get_hostname() == "appa":
         appa_main(
             Robot(
-                motor_l=Port.B,
+                motor_l=Port.A,
                 motor_r=Port.C,
                 color_fl=Port.S1,
                 color_fr=Port.S2,
@@ -131,7 +132,7 @@ def main():
     else:
         momo_main(
             Robot(
-                infra_back=Port.S1,
+                ultra_back=Port.S1,
                 infra_side=Port.S2,
                 color_front=Port.S3,
                 ultra_front=Port.S4,
