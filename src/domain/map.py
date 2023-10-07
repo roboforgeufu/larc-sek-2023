@@ -1,4 +1,5 @@
 from math import sqrt
+from robot import Robot
 
 # 12 de largura, 9 de altura
 city_map = [
@@ -70,3 +71,100 @@ def a_star(start: tuple[int, int], goal, heuristic):
                 if neighbour not in open_set:
                     open_set.add(neighbour)
     return -1
+
+def set_path_routine(goal):
+
+    initial_position = (8,10)
+    path_positions_list = a_star(initial_position, goal, euclidian_distance)
+    zero_size_elements = [(0,1),(0,3),(0,5),(0,7),(0,9),
+                          (1,0),(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),(1,8),(1,9),(1,10),(1,11),
+                          (2,1),(2,3),(2,5),(2,7),(2,9),
+                          (3,0),(3,1),(3,2),(3,3),(3,4),(3,5),(3,6),(3,7),(3,8),(3,9),(3,10),(3,11),
+                          (4,1),(4,3),(4,5),(4,7),(4,9),
+                          (5,0),(5,1),(5,2),(5,3),(5,4),(5,5),(5,6),(5,7),(5,8),(5,9),(5,10),(5,11),
+                          (6,1),(6,3),(6,5),(6,7),(6,9),
+                          (7,0),(7,1),(7,2),(7,3),(7,4),(7,5),(7,6),(7,7),(7,8),(7,9),(7,10),(7,11),
+                          (8,1),(8,3),(8,5),(8,7),(8,9)]
+    
+    path_with_curves = find_turns(path_positions_list)
+    path_movements_list = ghost_busters(zero_size_elements, path_with_curves)
+
+    i = 0
+    for path in path_movements_list:
+        if(isinstance(path, tuple)):
+            path_movements_list[i] = 30
+        i += 1
+
+    return path_movements_list
+
+def ghost_busters(ghosts, busters):
+#busters: é a lista de caminho
+#ghosts: é a lista de quadrados fantasmas
+    i = 0
+    while(i < len(busters)):
+        for ghost in ghosts:
+            if (busters[i] == ghost):
+                busters[i] = 0
+        i += 1
+    return busters
+
+def find_turns(path_list):
+    find_turn_list = []
+    for i in range(len(path_list)-1):
+        element = (path_list[i+1][0]-path_list[i][0], path_list[i+1][1]-path_list[i][1])
+        if element == (-1,0):
+            find_turn_list.append("N")
+        elif element == (1,0):
+            find_turn_list.append("S")
+        elif element == (0,1):
+            find_turn_list.append("L")
+        elif element == (0,-1):
+            find_turn_list.append("O")
+        i += 1
+
+    for i in range(len(find_turn_list)-1):
+        if (find_turn_list[i] != find_turn_list[i+1]):
+
+            if find_turn_list[i] == "N":
+                if find_turn_list[i+1] == "O":
+                    path_list.insert(i+2, "curva_esquerda")
+                    find_turn_list.insert(i+1, "curva_esquerda")
+                else:
+                    path_list.insert(i+2, "curva_direita")
+                    find_turn_list.insert(i+1, "curva_direita")
+
+            elif find_turn_list[i] == "S":
+                if find_turn_list[i+1] == "L":
+                    path_list.insert(i+2, "curva_esquerda")
+                    find_turn_list.insert(i+1, "curva_esquerda")
+                else:
+                    path_list.insert(i+2, "curva_direita")
+                    find_turn_list.insert(i+1, "curva_direita")
+
+            elif find_turn_list[i] == "L":
+                if find_turn_list[i+1] == "N":
+                    path_list.insert(i+2, "curva_esquerda")
+                    find_turn_list.insert(i+1, "curva_esquerda")
+                else:
+                    path_list.insert(i+2, "curva_direita")
+                    find_turn_list.insert(i+1, "curva_direita")
+
+            elif find_turn_list[i] == "O":
+                if find_turn_list[i+1] == "S":
+                    path_list.insert(i+2, "curva_esquerda")
+                    find_turn_list.insert(i+1, "curva_esquerda")
+                else:
+                    path_list.insert(i+2, "curva_direita")
+                    find_turn_list.insert(i+1, "curva_direita")
+
+    return path_list
+
+def path_to_movement(robot:Robot):
+    movement_list = set_path_routine((0,2))
+    for movement in movement_list:
+        if (movement == 30):
+            robot.pid_walk(cm=30, vel=80)
+        elif (movement == "curva_direita"):
+            robot.pid_turn(90)
+        elif (movement == "curva_esquerda"):
+            robot.pid_turn(-90)

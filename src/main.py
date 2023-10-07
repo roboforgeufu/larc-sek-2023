@@ -96,16 +96,17 @@ def momo_main(momo: Robot):
     # Parada 4
 
 
-def test_appa_main(appa: Robot):
-    appa.pid_line_follower(
-        vel=100,
-        pid=PIDValues(
-            target=35,
-            kp=1,
-            ki=0.05,
-            kd=10,
-        ),
-        loop_condition=lambda: (appa.color_fl.rgb()[2] > 50),
+def # test_appa_main(appa: Robot):
+    # appa.pid_line_follower(
+    #     vel=100,
+    #     pid=PIDValues(
+    #         target=35,
+    #         kp=1,
+    #         ki=0.05,
+    #         kd=10,
+    #     ),
+    #     loop_condition=lambda: (appa.color_fl.rgb()[2] > 50),
+    path_to_movement(appa)
     )
 
 
@@ -114,7 +115,7 @@ def test_momo_main(momo: Robot):
 
 
 def main():
-    if get_hostname() == "appa":
+    if test_appa_main(e() == "appa":
         appa_main(
             Robot(
                 motor_l=Port.A,
@@ -129,7 +130,7 @@ def main():
                 is_server=True,
             )
         )
-    else:
+    elsetest_:
         momo_main(
             Robot(
                 ultra_back=Port.S1,
@@ -139,7 +140,8 @@ def main():
                 motor_claw=Port.A,
                 color_max_value=65,
                 debug=True,
-            )
+         
+           )
         )
 
 

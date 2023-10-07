@@ -85,11 +85,8 @@ def set_path_routine(goal):
                           (7,0),(7,1),(7,2),(7,3),(7,4),(7,5),(7,6),(7,7),(7,8),(7,9),(7,10),(7,11),
                           (8,1),(8,3),(8,5),(8,7),(8,9)]
     
-    #print(path_positions_list)
     path_with_curves = find_turns(path_positions_list)
-    #print(path_with_curves)
     path_movements_list = ghost_busters(zero_size_elements, path_with_curves)
-    #print(path_movements_list)
 
     i = 0
     for path in path_movements_list:
@@ -97,7 +94,7 @@ def set_path_routine(goal):
             path_movements_list[i] = 30
         i += 1
 
-    print(path_movements_list)
+    return path_movements_list
 
 def ghost_busters(ghosts, busters):
 #busters: é a lista de caminho
@@ -158,8 +155,18 @@ def find_turns(path_list):
                 else:
                     path_list.insert(i+2, "curva_direita")
                     find_turn_list.insert(i+1, "curva_direita")
-    
-    #print(find_turn_list)
+
     return path_list
 
-set_path_routine((6,2))
+def path_to_movement():
+    movement_list = set_path_routine((0,2))
+    for movement in movement_list:
+        if (movement == 30):
+            robot.pid_walk(cm=30, vel=80)
+        elif (movement == "curva_direita"):
+            robot.pid_turn(90)
+        elif (movement == "curva_esquerda"):
+            robot.pid_turn(-90)
+
+path_to_movement()
+# set_path_routine((6,2))
