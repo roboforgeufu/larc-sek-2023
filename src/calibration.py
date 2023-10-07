@@ -4,7 +4,12 @@ from pybricks.ev3devices import ColorSensor, InfraredSensor, Motor, UltrasonicSe
 from pybricks.hubs import EV3Brick
 from pybricks.parameters import Color, Port, Stop
 from pybricks.tools import DataLog, wait
-
+from sensor_decision_trees import (
+    s1_decision_tree,
+    s2_decision_tree,
+    s3_decision_tree,
+    s4_decision_tree,
+)
 from utils import ev3_print, wait_button_pressed
 
 ALL_COLORS = [
@@ -42,5 +47,20 @@ def calibrate_all_sensors():
             wait(500)
 
 
+def test_calibration():
+    brick = EV3Brick()
+    sensor1 = ColorSensor(Port.S1)
+    sensor2 = ColorSensor(Port.S2)
+    sensor3 = ColorSensor(Port.S3)
+    sensor4 = ColorSensor(Port.S4)
+    while True:
+        ev3_print("S1:", s1_decision_tree(sensor1.rgb()), ev3=brick)
+        ev3_print("S2:", s2_decision_tree(sensor2.rgb()), ev3=brick)
+        ev3_print("S3:", s3_decision_tree(sensor3.rgb()), ev3=brick)
+        ev3_print("S4:", s4_decision_tree(sensor4.rgb()), ev3=brick)
+        wait(100)
+        brick.screen.clear()
+
+
 if __name__ == "__main__":
-    calibrate_all_sensors()
+    test_calibration()
