@@ -28,6 +28,7 @@ from pybricks.tools import wait
 from robot import Robot
 from utils import PIDValues, ev3_print, get_hostname, wait_button_pressed
 from domain.chess_tower import chess_tower
+from domain.map import path_to_movement
 
 def appa_main(appa: Robot):
     chess_tower(appa)
@@ -107,16 +108,14 @@ def  test_appa_main(appa: Robot):
     #     ),
     #     loop_condition=lambda: (appa.color_fl.rgb()[2] > 50),
     path_to_movement(appa)
-    
-
 
 def test_momo_main(momo: Robot):
     ...
 
 
 def main():
-    if test_appa_main(e() == "appa":
-        appa_main(
+    if get_hostname() == "appa":
+        test_appa_main(
             Robot(
                 motor_l=Port.A,
                 motor_r=Port.C,
@@ -130,8 +129,8 @@ def main():
                 is_server=True,
             )
         )
-    elsetest_:
-        momo_main(
+    else:
+        test_momo_main(
             Robot(
                 ultra_back=Port.S1,
                 infra_side=Port.S2,
@@ -140,7 +139,6 @@ def main():
                 motor_claw=Port.A,
                 color_max_value=65,
                 debug=True,
-         
            )
         )
 

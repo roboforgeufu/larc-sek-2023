@@ -159,10 +159,10 @@ def find_turns(path_list):
     return path_list
 
 def path_to_movement():
-    movement_list = set_path_routine((0,2))
+    movement_list = set_path_routine((6,2))
     for movement in movement_list:
         if (movement == 30):
-            robot.pid_walk(cm=30, vel=80)
+            robot.pid_walk(cm=30, speed=80)
         elif (movement == "curva_direita"):
             robot.pid_turn(90)
         elif (movement == "curva_esquerda"):
