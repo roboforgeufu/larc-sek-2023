@@ -498,7 +498,7 @@ class Robot:
     def pid_walk(
         self,
         cm,
-        vel=80,
+        speed=80,
     ):
         """Anda em linha reta com controle PID entre os motores."""
 
@@ -516,7 +516,7 @@ class Robot:
             motor_angle_average = (self.motor_l.angle() + self.motor_r.angle()) / 2
 
             elapsed_time, i_share, error = self.loopless_pid_walk(
-                elapsed_time, i_share, error, vel=vel
+                elapsed_time, i_share, error, vel=speed
             )
 
         self.off_motors()
