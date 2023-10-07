@@ -96,7 +96,7 @@ def momo_main(momo: Robot):
     # Parada 4
 
 
-def # test_appa_main(appa: Robot):
+def  test_appa_main(appa: Robot):
     # appa.pid_line_follower(
     #     vel=100,
     #     pid=PIDValues(
@@ -107,7 +107,7 @@ def # test_appa_main(appa: Robot):
     #     ),
     #     loop_condition=lambda: (appa.color_fl.rgb()[2] > 50),
     path_to_movement(appa)
-    )
+    
 
 
 def test_momo_main(momo: Robot):
