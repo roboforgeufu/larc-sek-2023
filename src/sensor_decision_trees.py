@@ -94,6 +94,32 @@ def s4_decision_tree(rgb_tuple):
                 return Color.WHITE
 
 
+def momo_s3_decision_tree(rgb_tuple):
+    r, g, b = rgb_tuple
+    if g <= 9.50:
+        if r <= 17.50:
+            if g <= 0.50:
+                return Color.RED
+            else:
+                if b <= 9.50:
+                    return Color.BROWN
+                else:
+                    return Color.BLUE
+        else:
+            return Color.RED
+    else:
+        if b <= 23.00:
+            if g <= 15.50:
+                if r <= 3.50:
+                    return Color.GREEN
+                else:
+                    return Color.BLUE
+            else:
+                return Color.GREEN
+        else:
+            return Color.BLUE
+
+
 class DecisionColorSensor:
     """
     Encapsula o sensor de cor numa classe que parametriza

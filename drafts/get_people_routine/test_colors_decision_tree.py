@@ -1,6 +1,14 @@
 from sklearn import tree
 
-all_colors = ["BLACK", "BLUE", "BROWN", "GREEN", "RED", "WHITE", "YELLOW"]
+all_colors = [
+    # "BLACK",
+    "BLUE",
+    "BROWN",
+    "GREEN",
+    "RED",
+    # "WHITE",
+    # "YELLOW",
+]
 
 s1_files = [
     "calibration_sensor_Port.S1_Color.BLACK_2020_04_11_02_39_39_117926.csv",
@@ -42,8 +50,16 @@ s4_files = [
     "calibration_sensor_Port.S4_Color.YELLOW_2020_04_11_02_47_12_911875.csv",
 ]
 
+
+momo_s3_files = [
+    "momo_calibration_sensor_Port.S3_Color.BLUE_2020_04_18_11_32_37_127387.csv",
+    "momo_calibration_sensor_Port.S3_Color.BROWN_2020_04_18_09_02_59_636320.csv",
+    "momo_calibration_sensor_Port.S3_Color.GREEN_2020_04_18_11_34_11_386542.csv",
+    "momo_calibration_sensor_Port.S3_Color.RED_2020_04_18_11_33_25_374582.csv",
+]
+
 color_array = []
-for filename in s4_files:
+for filename in momo_s3_files:
     with open("./logs/" + filename) as f:
         for line in f:
             color_array.append(
