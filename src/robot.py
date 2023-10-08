@@ -12,6 +12,7 @@ Não devem estar nesse módulo:
 
 import math
 
+import constants as const
 from pybricks.ev3devices import ColorSensor, InfraredSensor, Motor, UltrasonicSensor
 from pybricks.hubs import EV3Brick
 from pybricks.messaging import (
@@ -22,10 +23,9 @@ from pybricks.messaging import (
 )
 from pybricks.parameters import Color, Port
 from pybricks.tools import StopWatch, wait
-
-import constants as const
 from sensor_decision_trees import (
     DecisionColorSensor,
+    momo_s3_decision_tree,
     s1_decision_tree,
     s2_decision_tree,
     s3_decision_tree,
@@ -105,7 +105,7 @@ class Robot:
         if color_br is not None:
             self.color_br = DecisionColorSensor(color_br, s4_decision_tree)
         if color_front is not None:
-            self.color_front = ColorSensor(color_front)
+            self.color_front = DecisionColorSensor(color_front, momo_s3_decision_tree)
 
         if is_server:
             # APPA
