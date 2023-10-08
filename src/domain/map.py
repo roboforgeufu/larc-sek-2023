@@ -94,7 +94,10 @@ def set_path_routine(goal):
         if(isinstance(path, tuple)):
             path_movements_list[i] = 30
         i += 1
-
+    
+    print(path_movements_list)
+    path_movements_list.pop(0)
+    print(path_movements_list)
     return path_movements_list
 
 def ghost_busters(ghosts, busters):
@@ -108,8 +111,6 @@ def ghost_busters(ghosts, busters):
         i += 1
     return busters
 
-
-#mudanças feitas nessa função pro path finding ser de ré (corrigir pq foi feito tarde da noite)
 def find_turns(path_list):
     find_turn_list = []
     for i in range(len(path_list)-1):
@@ -129,35 +130,35 @@ def find_turns(path_list):
 
             if find_turn_list[i] == "N":
                 if find_turn_list[i+1] == "O":
-                    path_list.insert(i+2, "curva_direita")
-                    find_turn_list.insert(i+1, "curva_direita")
-                else:
                     path_list.insert(i+2, "curva_esquerda")
                     find_turn_list.insert(i+1, "curva_esquerda")
+                else:
+                    path_list.insert(i+2, "curva_direita")
+                    find_turn_list.insert(i+1, "curva_direita")
 
             elif find_turn_list[i] == "S":
                 if find_turn_list[i+1] == "L":
-                    path_list.insert(i+2, "curva_direita")
-                    find_turn_list.insert(i+1, "curva_direita")
-                else:
                     path_list.insert(i+2, "curva_esquerda")
                     find_turn_list.insert(i+1, "curva_esquerda")
+                else:
+                    path_list.insert(i+2, "curva_direita")
+                    find_turn_list.insert(i+1, "curva_direita")
 
             elif find_turn_list[i] == "L":
                 if find_turn_list[i+1] == "N":
-                    path_list.insert(i+2, "curva_direita")
-                    find_turn_list.insert(i+1, "curva_direita")
-                else:
                     path_list.insert(i+2, "curva_esquerda")
                     find_turn_list.insert(i+1, "curva_esquerda")
+                else:
+                    path_list.insert(i+2, "curva_direita")
+                    find_turn_list.insert(i+1, "curva_direita")
 
             elif find_turn_list[i] == "O":
                 if find_turn_list[i+1] == "S":
-                    path_list.insert(i+2, "curva_direita")
-                    find_turn_list.insert(i+1, "curva_direita")
-                else:
                     path_list.insert(i+2, "curva_esquerda")
                     find_turn_list.insert(i+1, "curva_esquerda")
+                else:
+                    path_list.insert(i+2, "curva_direita")
+                    find_turn_list.insert(i+1, "curva_direita")
 
     return path_list
 
@@ -165,7 +166,7 @@ def path_to_movement(robot:Robot):
     movement_list = set_path_routine((6,2))
     for movement in movement_list:
         if (movement == 30):
-            robot.pid_walk(cm=-30, speed=80)
+            robot.pid_walk(cm=30, speed=80)
         elif (movement == "curva_direita"):
             robot.pid_turn(90)
         elif (movement == "curva_esquerda"):
