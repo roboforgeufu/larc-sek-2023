@@ -72,10 +72,12 @@ def a_star(start: tuple[int, int], goal, heuristic):
                     open_set.add(neighbour)
     return -1
 
-def set_path_routine(goal):
+def set_path_routine(
+        goal,
+        start
+):
 
-    initial_position = (8,10)
-    path_positions_list = a_star(initial_position, goal, euclidian_distance)
+    path_positions_list = a_star(start, goal, euclidian_distance)
     zero_size_elements = [(0,1),(0,3),(0,5),(0,7),(0,9),
                           (1,0),(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),(1,8),(1,9),(1,10),(1,11),
                           (2,1),(2,3),(2,5),(2,7),(2,9),
@@ -95,9 +97,7 @@ def set_path_routine(goal):
             path_movements_list[i] = 30
         i += 1
     
-    print(path_movements_list)
     path_movements_list.pop(0)
-    print(path_movements_list)
     return path_movements_list
 
 def ghost_busters(ghosts, busters):
@@ -162,8 +162,15 @@ def find_turns(path_list):
 
     return path_list
 
-def path_to_movement(robot:Robot):
-    movement_list = set_path_routine((6,2))
+def path_to_movement(
+        robot: Robot,
+        goal,
+        start=None
+):
+    if start is None:
+        start = (8,10)
+    movement_list = set_path_routine(goal,start)
+    print(movement_list)
     for movement in movement_list:
         if (movement == 30):
             robot.pid_walk(cm=30, speed=80)
