@@ -1,5 +1,6 @@
 from math import sqrt
 from robot import Robot
+from utils import PIDValues
 from constants import ORIGIN_TUPLE
 
 
@@ -105,6 +106,12 @@ def set_path_routine(
     if start == ORIGIN_TUPLE:
         first_left_turn_index = path_movements_list.index("curva_esquerda")
         path_movements_list.insert((first_left_turn_index+1),"alinha_atras")
+    if goal != ORIGIN_TUPLE:
+        last_movement_index = len(path_movements_list)-1
+        path_movements_list.pop(last_movement_index)
+        alignment_routine = ["alinha_frente", -5, "curva_esquerda", "curva_esquerda", "alinha_frente", -5]
+        for movement in alignment_routine:
+            path_movements_list.append(movement)
 
     return path_movements_list
 
@@ -180,12 +187,17 @@ def path_to_movement(
         goal,
         start=None
 ):
+    # as direcoes sao invertidas pois o robo anda de ré
     if start is None:
         start = ORIGIN_TUPLE
     movement_list = set_path_routine(goal,start)
+    print(movement_list)
     for movement in movement_list:
-        if (movement == 30):
-            robot.pid_walk(cm=30, speed=-80)
+        if (isinstance(movement, int) and movement != 0):
+            if movement > 0:
+                robot.pid_walk(cm=movement, speed=-80)
+            else:
+                robot.pid_walk(cm=movement, speed=80)
         elif (movement == "curva_direita"):
             robot.pid_turn(90)
         elif (movement == "curva_esquerda"):
@@ -199,7 +211,7 @@ def path_to_movement(
             )
             robot.pid_walk(cm=2, speed=-30)
             robot.pid_align(
-                PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+                PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
                 sensor_function_l=lambda: robot.color_fl.rgb()[2],
                 sensor_function_r=lambda: robot.color_fr.rgb()[2],
             )
@@ -212,9 +224,9 @@ def path_to_movement(
                 left_reflection_function=lambda: robot.color_bl.rgb()[2],
                 right_reflection_function=lambda: robot.color_br.rgb()[2],
             )
-            robot.pid_walk(cm=2, speed=-30)
+            robot.pid_walk(cm=2, speed=30)
             robot.pid_align(
-                PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+                PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
                 sensor_function_l=lambda: robot.color_bl.rgb()[2],
                 sensor_function_r=lambda: robot.color_br.rgb()[2],
                 direction_sign=-1,
