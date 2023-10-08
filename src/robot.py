@@ -12,20 +12,25 @@ Não devem estar nesse módulo:
 
 import math
 
-from pybricks.ev3devices import (ColorSensor, InfraredSensor, Motor,
-                                 UltrasonicSensor)
+import constants as const
+from pybricks.ev3devices import ColorSensor, InfraredSensor, Motor, UltrasonicSensor
 from pybricks.hubs import EV3Brick
-from pybricks.messaging import (BluetoothMailboxClient, BluetoothMailboxServer,
-                                NumericMailbox, TextMailbox)
+from pybricks.messaging import (
+    BluetoothMailboxClient,
+    BluetoothMailboxServer,
+    NumericMailbox,
+    TextMailbox,
+)
 from pybricks.parameters import Color, Port
 from pybricks.tools import StopWatch, wait
-
-import constants as const
-from sensor_decision_trees import (DecisionColorSensor, s1_decision_tree,
-                                   s2_decision_tree, s3_decision_tree,
-                                   s4_decision_tree)
-from utils import (PIDValues, between, get_hostname, normalize_color,
-                   wait_button_pressed)
+from sensor_decision_trees import (
+    DecisionColorSensor,
+    s1_decision_tree,
+    s2_decision_tree,
+    s3_decision_tree,
+    s4_decision_tree,
+)
+from utils import PIDValues, between, get_hostname, normalize_color, wait_button_pressed
 
 
 class Robot:
@@ -215,7 +220,6 @@ class Robot:
         motor_error_i = 0
         prev_motor_error = 0
 
-
         has_seen_obstacle = False
 
         diff_ref_r = 0
@@ -229,8 +233,12 @@ class Robot:
             diff_ref_l = left_reflection_function() - starting_ref_l
 
             # Controle PID entre os motores
-            if (abs(diff_ref_l) < reflection_diff and abs(diff_ref_r) < reflection_diff) and (speed_l == speed_r):
-                motor_diff = (self.motor_r.angle() - initial_motor_r_angle) - (self.motor_l.angle() - initial_motor_l_angle)
+            if (
+                abs(diff_ref_l) < reflection_diff and abs(diff_ref_r) < reflection_diff
+            ) and (speed_l == speed_r):
+                motor_diff = (self.motor_r.angle() - initial_motor_r_angle) - (
+                    self.motor_l.angle() - initial_motor_l_angle
+                )
                 motor_error = motor_diff
 
                 motor_error_i += motor_error
@@ -256,14 +264,14 @@ class Robot:
             if abs(diff_ref_r) < reflection_diff:
                 self.motor_r.dc(speed_r - pid_speed)
             else:
-                self.motor_r.dc(((speed_r)/abs(speed_r))*(speed_r + pid_speed + 30))
+                self.motor_r.dc(((speed_r) / abs(speed_r)) * (speed_r + pid_speed + 30))
                 initial_motor_r_angle = self.motor_r.angle()
                 initial_motor_l_angle = self.motor_l.angle()
 
             if abs(diff_ref_l) < reflection_diff:
                 self.motor_l.dc(speed_l + pid_speed)
             else:
-                self.motor_l.dc(((speed_l)/abs(speed_l))*(speed_l + pid_speed + 30))
+                self.motor_l.dc(((speed_l) / abs(speed_l)) * (speed_l + pid_speed + 30))
                 initial_motor_l_angle = self.motor_l.angle()
                 initial_motor_r_angle = self.motor_r.angle()
         self.off_motors()
@@ -672,6 +680,7 @@ class Robot:
         pid: PIDValues = PIDValues(target=30, kp=2, ki=0.001, kd=0.3),
         sensor_function_l=None,
         sensor_function_r=None,
+        direction_sign=1,
     ):
         """
         Alinha usando os dois pares (motor - sensor de cor) e controle PID.
@@ -716,8 +725,8 @@ class Robot:
             right_speed_sign = -1 if right_pid_speed < 0 else 1
             right_pid_speed = min(75, abs(right_pid_speed)) * right_speed_sign
 
-            self.motor_l.dc(left_pid_speed)
-            self.motor_r.dc(right_pid_speed)
+            self.motor_l.dc(left_pid_speed * direction_sign)
+            self.motor_r.dc(right_pid_speed * direction_sign)
 
             # self.ev3_print(left_error, right_error)
             if abs(left_error) <= 7 and abs(right_error) <= 7:
