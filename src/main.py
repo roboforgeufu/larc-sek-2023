@@ -22,12 +22,11 @@ Não devem estar nesse módulo:
 
 # pylint: skip-file
 
-from pybricks.parameters import Color, Port, Stop
-from pybricks.tools import wait
-
 import constants as const
 from domain.chess_tower import chess_tower
 from domain.map import path_to_movement
+from pybricks.parameters import Color, Port, Stop
+from pybricks.tools import wait
 from robot import Robot
 from utils import PIDValues, ev3_print, get_hostname, wait_button_pressed
 
@@ -149,7 +148,7 @@ def appa_main(appa: Robot):
     #
 
     park_flag = 0
-    passenger_info.split()
+    passenger_info = passenger_info.split()
     if passenger_info[0] == "CHILD":
         if passenger_info[1] == "Color.BLUE":
             goal = (0, 8)  # escola
@@ -193,6 +192,11 @@ def momo_main(momo: Robot):
     #
     # Coleta de pessoas
     #
+
+    while True:
+        momo.stop_mail_box.wait_new()
+        if momo.stop_mail_box.read() == 0:
+            break
 
     momo.infra_side_box.send(momo.infra_side.distance())
     while momo.stop_mail_box.read() == 0:
@@ -258,6 +262,7 @@ def test_appa_main(appa: Robot):
         left_reflection_function=lambda: appa.color_fl.rgb()[2],
         right_reflection_function=lambda: appa.color_fr.rgb()[2],
     )
+    appa.simple_walk(speed=30, cm=-2)
     appa.pid_align(
         PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
         sensor_function_l=lambda: appa.color_fl.rgb()[2],
@@ -304,7 +309,7 @@ def test_appa_main(appa: Robot):
     appa.simple_walk(speed=30, cm=-10)
 
     passenger_info = "CHILD Color.BLUE"
-    passenger_info.split()
+    passenger_info = passenger_info.split()
     if passenger_info[0] == "CHILD":
         if passenger_info[1] == "Color.BLUE":
             goal = (0, 8)  # escola
@@ -353,7 +358,7 @@ def main():
             )
         )
     else:
-        test_momo_main(
+        momo_main(
             Robot(
                 ultra_back=Port.S1,
                 infra_side=Port.S2,
