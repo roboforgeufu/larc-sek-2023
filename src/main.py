@@ -22,12 +22,11 @@ Não devem estar nesse módulo:
 
 # pylint: skip-file
 
-from pybricks.parameters import Color, Port, Stop
-from pybricks.tools import wait
-
 import constants as const
 from domain.chess_tower import chess_tower
 from domain.map import path_to_movement
+from pybricks.parameters import Color, Port, Stop
+from pybricks.tools import wait
 from robot import Robot
 from utils import PIDValues, ev3_print, get_hostname, wait_button_pressed
 
@@ -36,6 +35,7 @@ def appa_main(appa: Robot):
     # Localizacao inicial
 
     chess_tower(appa)
+    # return True
 
     # Coleta de pessoas
 
@@ -217,7 +217,7 @@ def test_momo_main(momo: Robot):
 
 def main():
     if get_hostname() == "appa":
-        test_appa_main(
+        appa_main(
             Robot(
                 motor_l=Port.B,
                 motor_r=Port.C,
