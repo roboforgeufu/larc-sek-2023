@@ -199,7 +199,7 @@ def chess_tower(robot: Robot):
                     sensor_function_l=lambda: robot.color_fl.rgb()[2],
                     sensor_function_r=lambda: robot.color_fr.rgb()[2],
                 )
-                robot.pid_walk(cm=5, speed=-50)
+                robot.pid_walk(cm=3, speed=-50)
                 robot.pid_turn(-90)
                 # normaliza a posicao na origem
                 break
