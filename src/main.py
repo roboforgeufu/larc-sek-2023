@@ -174,6 +174,9 @@ def appa_main(appa: Robot):
         elif passenger_info[1] == "Color.RED":
             goal = (4, 4)  # farmacia
 
+    appa.ev3_print(passenger_info)
+    appa.ev3_print(goal)
+
     path_to_movement(appa, goal)
 
     #
