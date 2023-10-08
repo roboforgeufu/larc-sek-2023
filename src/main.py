@@ -31,12 +31,16 @@ from domain.chess_tower import chess_tower
 from domain.map import path_to_movement
 
 def appa_main(appa: Robot):
+    #
     # Localizacao inicial
+    #
 
     chess_tower(appa)
-
+    
+    #
     # Coleta de pessoas
-
+    #
+    
     appa.stop_mail_box.send(0)
     appa.infra_side_box.wait()
     appa.pid_line_follower(
@@ -52,18 +56,23 @@ def appa_main(appa: Robot):
         ),
     )
     appa.stop_mail_box.send(1)
-    # Parada 1
 
+    # Parada 1
     appa.simple_walk(speed=30, cm=-1.5)
     appa.pid_turn(90)
     appa.simple_walk(speed=30, cm=-3)
     appa.pid_align()
     appa.simple_walk(speed=30, cm=4)
+
     # Parada 2
     appa.stop_mail_box.send(0)
+
     # Parada 3
     appa.mbox.wait()
-    appa.ev3_print(appa.mbox.read())
+
+    # recebe info sobre tamanho e cor do passageiro
+    passenger_info = appa.mbox.read()
+    appa.ev3_print(passenger_info)
 
     # Parada 4
     appa.simple_walk(speed=30, cm=-10)
@@ -77,7 +86,9 @@ def appa_main(appa: Robot):
     #     right_reflection_function=lambda: appa.color_br.rgb()[2],
     # )
 
+    #
     # Retorno para a origem
+    #
 
     # alinha no azul
     appa.forward_while_same_reflection(
@@ -93,6 +104,7 @@ def appa_main(appa: Robot):
     )
     appa.simple_walk(speed=30, cm=-10)
     appa.pid_turn(90)
+
     # vai até a origem
     appa.forward_while_same_reflection(
         reflection_diff=22,
@@ -100,13 +112,9 @@ def appa_main(appa: Robot):
         left_reflection_function=lambda: appa.color_fl.rgb()[2],
         right_reflection_function=lambda: appa.color_fr.rgb()[2],
     )
-    appa.pid_align(
-        PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-        sensor_function_l=lambda: appa.color_fl.rgb()[2],
-        sensor_function_r=lambda: appa.color_fr.rgb()[2],
-    )
     appa.simple_walk(speed=30, cm=-10)
     appa.pid_turn(90)
+
     # restaura a posicao inicial
     appa.forward_while_same_reflection(
         reflection_diff=22,
@@ -121,36 +129,105 @@ def appa_main(appa: Robot):
     )
     appa.simple_walk(speed=30, cm=-10)
     appa.pid_turn(-90)
+    appa.forward_while_same_reflection(
+        reflection_diff=22,
+        avoid_obstacles=False,
+        left_reflection_function=lambda: appa.color_fl.rgb()[2],
+        right_reflection_function=lambda: appa.color_fr.rgb()[2],
+    )
+    appa.pid_align(
+        PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+        sensor_function_l=lambda: appa.color_fl.rgb()[2],
+        sensor_function_r=lambda: appa.color_fr.rgb()[2],
+    )
+    appa.simple_walk(speed=30, cm=-10)
+    
 
+    #
     # Pathfinding e movimentacao
+    #
 
+    park_flag = 0
+    passenger_info.split()
+    if passenger_info[0] == "CHILD":
+        if passenger_info[1] == "Color.BLUE":
+            goal = (0,8) #escola
+        elif passenger_info[1] == "Color.BROWN":
+            goal = (8,8) #biblioteca
+        elif passenger_info[1] == "Color.GREEN":
+            if park_flag == 0: #parque
+                goal = (8,0)
+            elif park_flag == 1:
+                goal = (4,0)
+            elif park_flag == 2:
+                goal = (0,0)
+            park_flag += 1
+
+    if passenger_info[0] == "ADULT":
+        if passenger_info[1] == "Color.BLUE":
+            goal = (8,4) #museu
+        elif passenger_info[1] == "Color.BROWN":
+            goal = (0,4) #padaria
+        elif passenger_info[1] == "Color.GREEN":
+            goal = (4,8) #prefeitura
+        elif passenger_info[1] == "Color.RED":
+            goal = (4,4) #farmacia
+
+    path_to_movement(appa,goal)
+
+    #
     # Desembarque pessoas
+    #
 
+    #
     # Retorno a origem
+    #
 
+    path_to_movement(appa,(8,10),start=goal)
 
 def momo_main(momo: Robot):
     momo.motor_claw.run_until_stalled(500)
-    # Start
+
+    #
+    # Coleta de pessoas
+    #
+
     momo.infra_side_box.send(momo.infra_side.distance())
     while momo.stop_mail_box.read() == 0:
         momo.infra_side_box.send(momo.infra_side.distance())
         wait(10)
     # Parada 1
+
     # Parada 2
     momo.stop_mail_box.wait_new()
     momo.motor_claw.run_until_stalled(-500, then=Stop.HOLD)
-    # Parada 3
 
+    # Parada 3
     distance = momo.ultra_front.distance()
     momo.ev3_print("DIST:", distance)
     if distance > 60:
         age = "CHILD"
     else:
         age = "ADULT"
-    momo.mbox.send(str(age) + " " + str(momo.color_front.rgb()))
+    momo.mbox.send(str(age) + " " + str(momo.color_front.color()))
+
     # Parada 4
 
+    #
+    # Retorno para a origem
+    #
+
+    #
+    # Pathfinding e movimentacao
+    #
+
+    #
+    # Desembarque pessoas
+    #
+
+    #
+    # Retorno a origem
+    #
 
 def  test_appa_main(appa: Robot):
     # appa.pid_line_follower(
