@@ -38,11 +38,11 @@ def appa_main(appa: Robot):
     #
 
     chess_tower(appa)
-    
-    #
+    # return True
+
     # Coleta de pessoas
     #
-    
+
     appa.stop_mail_box.send(0)
     appa.infra_side_box.wait()
     appa.pid_line_follower(
@@ -143,7 +143,6 @@ def appa_main(appa: Robot):
         sensor_function_r=lambda: appa.color_fr.rgb()[2],
     )
     appa.simple_walk(speed=30, cm=-10)
-    
 
     #
     # Pathfinding e movimentacao
@@ -153,29 +152,29 @@ def appa_main(appa: Robot):
     passenger_info.split()
     if passenger_info[0] == "CHILD":
         if passenger_info[1] == "Color.BLUE":
-            goal = (0,8) #escola
+            goal = (0, 8)  # escola
         elif passenger_info[1] == "Color.BROWN":
-            goal = (8,8) #biblioteca
+            goal = (8, 8)  # biblioteca
         elif passenger_info[1] == "Color.GREEN":
-            if park_flag == 0: #parque
-                goal = (8,0)
+            if park_flag == 0:  # parque
+                goal = (8, 0)
             elif park_flag == 1:
-                goal = (4,0)
+                goal = (4, 0)
             elif park_flag == 2:
-                goal = (0,0)
+                goal = (0, 0)
             park_flag += 1
 
     if passenger_info[0] == "ADULT":
         if passenger_info[1] == "Color.BLUE":
-            goal = (8,4) #museu
+            goal = (8, 4)  # museu
         elif passenger_info[1] == "Color.BROWN":
-            goal = (0,4) #padaria
+            goal = (0, 4)  # padaria
         elif passenger_info[1] == "Color.GREEN":
-            goal = (4,8) #prefeitura
+            goal = (4, 8)  # prefeitura
         elif passenger_info[1] == "Color.RED":
-            goal = (4,4) #farmacia
+            goal = (4, 4)  # farmacia
 
-    path_to_movement(appa,goal)
+    path_to_movement(appa, goal)
 
     #
     # Desembarque pessoas
@@ -185,7 +184,8 @@ def appa_main(appa: Robot):
     # Retorno a origem
     #
 
-    path_to_movement(appa,(8,10),start=goal)
+    path_to_movement(appa, (8, 10), start=goal)
+
 
 def momo_main(momo: Robot):
     momo.motor_claw.run_until_stalled(500)
@@ -230,6 +230,7 @@ def momo_main(momo: Robot):
     #
     # Retorno a origem
     #
+
 
 def test_appa_main(appa: Robot):
     # appa.pid_line_follower(
@@ -302,33 +303,33 @@ def test_appa_main(appa: Robot):
     )
     appa.simple_walk(speed=30, cm=-10)
 
-    passenger_info = ("CHILD Color.BLUE")
+    passenger_info = "CHILD Color.BLUE"
     passenger_info.split()
     if passenger_info[0] == "CHILD":
         if passenger_info[1] == "Color.BLUE":
-            goal = (0,8) #escola
+            goal = (0, 8)  # escola
         elif passenger_info[1] == "Color.BROWN":
-            goal = (8,8) #biblioteca
+            goal = (8, 8)  # biblioteca
         elif passenger_info[1] == "Color.GREEN":
-            if park_flag == 0: #parque
-                goal = (8,0)
+            if park_flag == 0:  # parque
+                goal = (8, 0)
             elif park_flag == 1:
-                goal = (4,0)
+                goal = (4, 0)
             elif park_flag == 2:
-                goal = (0,0)
+                goal = (0, 0)
             park_flag += 1
 
     if passenger_info[0] == "ADULT":
         if passenger_info[1] == "Color.BLUE":
-            goal = (8,4) #museu
+            goal = (8, 4)  # museu
         elif passenger_info[1] == "Color.BROWN":
-            goal = (0,4) #padaria
+            goal = (0, 4)  # padaria
         elif passenger_info[1] == "Color.GREEN":
-            goal = (4,8) #prefeitura
+            goal = (4, 8)  # prefeitura
         elif passenger_info[1] == "Color.RED":
-            goal = (4,4) #farmacia
+            goal = (4, 4)  # farmacia
 
-    path_to_movement(appa,goal)
+    path_to_movement(appa, goal)
 
 
 def test_momo_main(momo: Robot):
@@ -337,7 +338,7 @@ def test_momo_main(momo: Robot):
 
 def main():
     if get_hostname() == "appa":
-        test_appa_main(
+        appa_main(
             Robot(
                 motor_l=Port.B,
                 motor_r=Port.C,

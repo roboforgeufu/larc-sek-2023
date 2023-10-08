@@ -264,14 +264,14 @@ class Robot:
             if abs(diff_ref_r) < reflection_diff:
                 self.motor_r.dc(speed_r - pid_speed)
             else:
-                self.motor_r.dc(((speed_r) / abs(speed_r)) * (speed_r + pid_speed + 30))
+                self.motor_r.dc(((speed_r) / abs(speed_r)) * (speed_r + pid_speed + const.FORWARD_SPEED_CORRECTION))
                 initial_motor_r_angle = self.motor_r.angle()
                 initial_motor_l_angle = self.motor_l.angle()
 
             if abs(diff_ref_l) < reflection_diff:
                 self.motor_l.dc(speed_l + pid_speed)
             else:
-                self.motor_l.dc(((speed_l) / abs(speed_l)) * (speed_l + pid_speed + 30))
+                self.motor_l.dc(((speed_l) / abs(speed_l)) * (speed_l + pid_speed + const.FORWARD_SPEED_CORRECTION))
                 initial_motor_l_angle = self.motor_l.angle()
                 initial_motor_r_angle = self.motor_r.angle()
         self.off_motors()
