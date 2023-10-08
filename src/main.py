@@ -107,7 +107,8 @@ def  test_appa_main(appa: Robot):
     #         kd=10,
     #     ),
     #     loop_condition=lambda: (appa.color_fl.rgb()[2] > 50),
-    path_to_movement(appa)
+    chess_tower(appa)
+
 
 def test_momo_main(momo: Robot):
     ...

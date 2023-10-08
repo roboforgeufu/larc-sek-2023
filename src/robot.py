@@ -12,26 +12,20 @@ Não devem estar nesse módulo:
 
 import math
 
-from pybricks.ev3devices import ColorSensor, InfraredSensor, Motor, UltrasonicSensor
+from pybricks.ev3devices import (ColorSensor, InfraredSensor, Motor,
+                                 UltrasonicSensor)
 from pybricks.hubs import EV3Brick
-from pybricks.messaging import (
-    BluetoothMailboxClient,
-    BluetoothMailboxServer,
-    NumericMailbox,
-    TextMailbox,
-)
+from pybricks.messaging import (BluetoothMailboxClient, BluetoothMailboxServer,
+                                NumericMailbox, TextMailbox)
 from pybricks.parameters import Color, Port
 from pybricks.tools import StopWatch, wait
 
 import constants as const
-from sensor_decision_trees import (
-    DecisionColorSensor,
-    s1_decision_tree,
-    s2_decision_tree,
-    s3_decision_tree,
-    s4_decision_tree,
-)
-from utils import PIDValues, between, get_hostname, normalize_color, wait_button_pressed
+from sensor_decision_trees import (DecisionColorSensor, s1_decision_tree,
+                                   s2_decision_tree, s3_decision_tree,
+                                   s4_decision_tree)
+from utils import (PIDValues, between, get_hostname, normalize_color,
+                   wait_button_pressed)
 
 
 class Robot:
@@ -215,17 +209,18 @@ class Robot:
         starting_ref_r = right_reflection_function()
         starting_ref_l = left_reflection_function()
 
-        self.motor_l.reset_angle(0)
-        self.motor_r.reset_angle(0)
+        initial_motor_l_angle = self.motor_l.angle()
+        initial_motor_r_angle = self.motor_r.angle()
 
         motor_error_i = 0
         prev_motor_error = 0
 
-        stopped_l = False
-        stopped_r = False
 
         has_seen_obstacle = False
-        while not stopped_l or not stopped_r:
+
+        diff_ref_r = 0
+        diff_ref_l = 0
+        while abs(diff_ref_l) < reflection_diff or abs(diff_ref_r) < reflection_diff:
             if avoid_obstacles and self.ultra_front.distance() < const.OBSTACLE_DIST:
                 has_seen_obstacle = True
                 break
@@ -234,8 +229,8 @@ class Robot:
             diff_ref_l = left_reflection_function() - starting_ref_l
 
             # Controle PID entre os motores
-            if (not stopped_l and not stopped_r) and (speed_l == speed_r):
-                motor_diff = self.motor_r.angle() - self.motor_l.angle()
+            if (abs(diff_ref_l) < reflection_diff and abs(diff_ref_r) < reflection_diff) and (speed_l == speed_r):
+                motor_diff = (self.motor_r.angle() - initial_motor_r_angle) - (self.motor_l.angle() - initial_motor_l_angle)
                 motor_error = motor_diff
 
                 motor_error_i += motor_error
@@ -261,16 +256,16 @@ class Robot:
             if abs(diff_ref_r) < reflection_diff:
                 self.motor_r.dc(speed_r - pid_speed)
             else:
-                if not stopped_l:
-                    stopped_l = True
-                self.motor_r.hold()
+                self.motor_r.dc(((speed_r)/abs(speed_r))*(speed_r + pid_speed + 30))
+                initial_motor_r_angle = self.motor_r.angle()
+                initial_motor_l_angle = self.motor_l.angle()
 
             if abs(diff_ref_l) < reflection_diff:
                 self.motor_l.dc(speed_l + pid_speed)
             else:
-                if not stopped_r:
-                    stopped_r = True
-                self.motor_l.hold()
+                self.motor_l.dc(((speed_l)/abs(speed_l))*(speed_l + pid_speed + 30))
+                initial_motor_l_angle = self.motor_l.angle()
+                initial_motor_r_angle = self.motor_r.angle()
         self.off_motors()
         return has_seen_obstacle
 
