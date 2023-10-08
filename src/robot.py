@@ -12,7 +12,6 @@ Não devem estar nesse módulo:
 
 import math
 
-import constants as const
 from pybricks.ev3devices import ColorSensor, InfraredSensor, Motor, UltrasonicSensor
 from pybricks.hubs import EV3Brick
 from pybricks.messaging import (
@@ -23,6 +22,8 @@ from pybricks.messaging import (
 )
 from pybricks.parameters import Color, Port
 from pybricks.tools import StopWatch, wait
+
+import constants as const
 from sensor_decision_trees import (
     DecisionColorSensor,
     s1_decision_tree,
@@ -264,14 +265,20 @@ class Robot:
             if abs(diff_ref_r) < reflection_diff:
                 self.motor_r.dc(speed_r - pid_speed)
             else:
-                self.motor_r.dc(((speed_r) / abs(speed_r)) * (speed_r + pid_speed + const.FORWARD_SPEED_CORRECTION))
+                self.motor_r.dc(
+                    ((speed_r) / abs(speed_r))
+                    * (speed_r + pid_speed + const.FORWARD_SPEED_CORRECTION)
+                )
                 initial_motor_r_angle = self.motor_r.angle()
                 initial_motor_l_angle = self.motor_l.angle()
 
             if abs(diff_ref_l) < reflection_diff:
                 self.motor_l.dc(speed_l + pid_speed)
             else:
-                self.motor_l.dc(((speed_l) / abs(speed_l)) * (speed_l + pid_speed + const.FORWARD_SPEED_CORRECTION))
+                self.motor_l.dc(
+                    ((speed_l) / abs(speed_l))
+                    * (speed_l + pid_speed + const.FORWARD_SPEED_CORRECTION)
+                )
                 initial_motor_l_angle = self.motor_l.angle()
                 initial_motor_r_angle = self.motor_r.angle()
         self.off_motors()

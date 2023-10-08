@@ -22,12 +22,11 @@ Não devem estar nesse módulo:
 
 # pylint: skip-file
 
-from pybricks.parameters import Color, Port, Stop
-from pybricks.tools import wait
-
 import constants as const
 from domain.chess_tower import chess_tower
 from domain.map import path_to_movement
+from pybricks.parameters import Color, Port, Stop
+from pybricks.tools import wait
 from robot import Robot
 from utils import PIDValues, ev3_print, get_hostname, wait_button_pressed
 
@@ -193,6 +192,11 @@ def momo_main(momo: Robot):
     #
     # Coleta de pessoas
     #
+
+    while True:
+        momo.stop_mail_box.wait_new()
+        if momo.stop_mail_box.read() == 0:
+            break
 
     momo.infra_side_box.send(momo.infra_side.distance())
     while momo.stop_mail_box.read() == 0:
