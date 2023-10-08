@@ -1,5 +1,7 @@
 from math import sqrt
 from robot import Robot
+from constants import ORIGIN_TUPLE
+
 
 # 12 de largura, 9 de altura
 city_map = [
@@ -7,7 +9,7 @@ city_map = [
     "PX XYX XYX E",
     "PX  O   O  E",
     "PX XXX XYX E",
-    "PYOYDYXXCX E",
+    "PYOYDYOXCX E",
     "PX XXX XYX E",
     "PX  O   O  E",
     "PX XYX XYX E",
@@ -25,7 +27,7 @@ def reconstruct_path(came_from: dict, current: tuple[int, int]):
 
 def get_neighbours(position: tuple[int, int]) -> list[tuple[int, int]]:
     x, y = position
-    neighbours = [(x + 1, y), (x, y + 1), (x - 1, y), (x, y - 1)]
+    neighbours = [(x, y - 1), (x - 1, y), (x, y + 1), (x + 1, y)]
     return [n for n in neighbours if n[0] in range(9) and n[1] in range(12)]
 
 
@@ -72,6 +74,7 @@ def a_star(start: tuple[int, int], goal, heuristic):
                     open_set.add(neighbour)
     return -1
 
+
 def set_path_routine(
         goal,
         start
@@ -87,7 +90,7 @@ def set_path_routine(
                           (6,1),(6,3),(6,5),(6,7),(6,9),
                           (7,0),(7,1),(7,2),(7,3),(7,4),(7,5),(7,6),(7,7),(7,8),(7,9),(7,10),(7,11),
                           (8,1),(8,3),(8,5),(8,7),(8,9)]
-    
+
     path_with_curves = find_turns(path_positions_list)
     path_movements_list = ghost_busters(zero_size_elements, path_with_curves)
 
@@ -96,9 +99,15 @@ def set_path_routine(
         if(isinstance(path, tuple)):
             path_movements_list[i] = 30
         i += 1
-    
+
     path_movements_list.pop(0)
+
+    if start == ORIGIN_TUPLE:
+        first_left_turn_index = path_movements_list.index("curva_esquerda")
+        path_movements_list.insert((first_left_turn_index+1),"alinha_atras")
+
     return path_movements_list
+
 
 def ghost_busters(ghosts, busters):
 #busters: é a lista de caminho
@@ -110,6 +119,7 @@ def ghost_busters(ghosts, busters):
                 busters[i] = 0
         i += 1
     return busters
+
 
 def find_turns(path_list):
     find_turn_list = []
@@ -125,7 +135,8 @@ def find_turns(path_list):
             find_turn_list.append("O")
         i += 1
 
-    for i in range(len(find_turn_list)-1):
+    i=0
+    while i < (len(find_turn_list)-1):
         if (find_turn_list[i] != find_turn_list[i+1]):
 
             if find_turn_list[i] == "N":
@@ -159,8 +170,10 @@ def find_turns(path_list):
                 else:
                     path_list.insert(i+2, "curva_direita")
                     find_turn_list.insert(i+1, "curva_direita")
+        i += 1
 
     return path_list
+
 
 def path_to_movement(
         robot: Robot,
@@ -168,9 +181,8 @@ def path_to_movement(
         start=None
 ):
     if start is None:
-        start = (8,10)
+        start = ORIGIN_TUPLE
     movement_list = set_path_routine(goal,start)
-    print(movement_list)
     for movement in movement_list:
         if (movement == 30):
             robot.pid_walk(cm=30, speed=-80)
@@ -178,3 +190,32 @@ def path_to_movement(
             robot.pid_turn(90)
         elif (movement == "curva_esquerda"):
             robot.pid_turn(-90)
+        elif (movement == "alinha_atras"):
+            robot.forward_while_same_reflection(
+                reflection_diff=22,
+                avoid_obstacles=False,
+                left_reflection_function=lambda: robot.color_fl.rgb()[2],
+                right_reflection_function=lambda: robot.color_fr.rgb()[2],
+            )
+            robot.pid_walk(cm=2, speed=-30)
+            robot.pid_align(
+                PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+                sensor_function_l=lambda: robot.color_fl.rgb()[2],
+                sensor_function_r=lambda: robot.color_fr.rgb()[2],
+            )
+        elif (movement == "alinha_frente"):
+            robot.forward_while_same_reflection(
+                speed_l=-50,
+                speed_r=-50,
+                reflection_diff=22,
+                avoid_obstacles=False,
+                left_reflection_function=lambda: robot.color_bl.rgb()[2],
+                right_reflection_function=lambda: robot.color_br.rgb()[2],
+            )
+            robot.pid_walk(cm=2, speed=-30)
+            robot.pid_align(
+                PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+                sensor_function_l=lambda: robot.color_bl.rgb()[2],
+                sensor_function_r=lambda: robot.color_br.rgb()[2],
+                direction_sign=-1,
+            )
