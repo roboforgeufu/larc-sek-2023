@@ -241,8 +241,8 @@ def test_appa_main(appa: Robot):
     #         kd=10,
     #     ),
     #     loop_condition=lambda: (appa.color_fl.rgb()[2] > 50),
-    # chess_tower(appa)
-    # path_to_movement(appa,(8,10),start=(6,2))
+    #chess_tower(appa)
+    #path_to_movement(appa,(8,10),start=(6,2))
 
     # alinha no azul
 
