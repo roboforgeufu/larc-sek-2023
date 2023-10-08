@@ -58,13 +58,13 @@ def chess_tower(robot: Robot):
 
         elif last_color == Color.BLUE or last_color == Color.RED:
             if last_color == Color.BLUE:
-                robot.pid_align(
-                    PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-                    sensor_function_l=lambda: robot.color_fl.rgb()[2],
-                    sensor_function_r=lambda: robot.color_fr.rgb()[2],
-                )
-                # Azul de costas
-                robot.pid_walk(cm=10, speed=80)
+                # robot.pid_align(
+                #     PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+                #     sensor_function_l=lambda: robot.color_fl.rgb()[2],
+                #     sensor_function_r=lambda: robot.color_fr.rgb()[2],
+                # )
+                # Azul de frente
+                robot.pid_walk(cm=10, speed=-80)
                 robot.pid_turn(90)
 
             else:
@@ -207,26 +207,28 @@ def chess_tower(robot: Robot):
                 left_reflection_function=lambda: robot.color_fl.rgb()[2],
                 right_reflection_function=lambda: robot.color_fr.rgb()[2],
             )
+            robot.pid_walk(cm=2, speed=-30)
             robot.pid_align(
                 PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
                 sensor_function_l=lambda: robot.color_fl.rgb()[2],
                 sensor_function_r=lambda: robot.color_fr.rgb()[2],
             )
             # chega na origem
-            robot.pid_walk(cm=10, speed=-30)
-            robot.pid_turn(90)
+            robot.pid_walk(cm=3, speed=-30)
+            robot.pid_turn(-90)
             robot.forward_while_same_reflection(
                 reflection_diff=22,
                 avoid_obstacles=False,
                 left_reflection_function=lambda: robot.color_fl.rgb()[2],
                 right_reflection_function=lambda: robot.color_fr.rgb()[2],
             )
+            robot.pid_walk(cm=2, speed=-30)
             robot.pid_align(
                 PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
                 sensor_function_l=lambda: robot.color_fl.rgb()[2],
                 sensor_function_r=lambda: robot.color_fr.rgb()[2],
             )
-            robot.pid_walk(cm=3, speed=-50)
+            robot.pid_walk(cm=3, speed=-30)
             robot.pid_turn(-90)
             robot.pid_align(
                 PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),

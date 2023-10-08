@@ -149,7 +149,7 @@ def appa_main(appa: Robot):
     #
 
     park_flag = 0
-    passenger_info.split()
+    passenger_info = passenger_info.split()
     if passenger_info[0] == "CHILD":
         if passenger_info[1] == "Color.BLUE":
             goal = (0, 8)  # escola
@@ -258,6 +258,7 @@ def test_appa_main(appa: Robot):
         left_reflection_function=lambda: appa.color_fl.rgb()[2],
         right_reflection_function=lambda: appa.color_fr.rgb()[2],
     )
+    appa.simple_walk(speed=30, cm=-2)
     appa.pid_align(
         PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
         sensor_function_l=lambda: appa.color_fl.rgb()[2],
@@ -304,7 +305,7 @@ def test_appa_main(appa: Robot):
     appa.simple_walk(speed=30, cm=-10)
 
     passenger_info = "CHILD Color.BLUE"
-    passenger_info.split()
+    passenger_info = passenger_info.split()
     if passenger_info[0] == "CHILD":
         if passenger_info[1] == "Color.BLUE":
             goal = (0, 8)  # escola
@@ -353,7 +354,7 @@ def main():
             )
         )
     else:
-        test_momo_main(
+        momo_main(
             Robot(
                 ultra_back=Port.S1,
                 infra_side=Port.S2,
