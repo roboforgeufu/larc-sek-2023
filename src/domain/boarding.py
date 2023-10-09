@@ -9,7 +9,7 @@ def passenger_boarding(robot: Robot):
         vel=60,
         pid=PIDValues(
             target=35,
-            kp=1,
+            kp=0.7,
             ki=0.05,
             kd=10,
         ),
