@@ -69,6 +69,7 @@ def appa_main(appa: Robot):
         #
 
         path_to_movement(appa, (8, 10), start=goal)
+        appa.stop_mail_box.send(1)
 
 
 def momo_main(momo: Robot):
@@ -247,7 +248,7 @@ def main():
                 color_bl=Port.S3,
                 color_br=Port.S4,
                 color_max_value=65,
-                turn_correction=1,
+                turn_correction=1.05,
                 debug=True,
                 is_server=True,
             )

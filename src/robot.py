@@ -188,8 +188,8 @@ class Robot:
 
     def forward_while_same_reflection(
         self,
-        speed_r=50,
-        speed_l=50,
+        speed_r=40,
+        speed_l=40,
         reflection_diff=10,
         avoid_obstacles=False,
         pid: PIDValues = PIDValues(
@@ -701,7 +701,7 @@ class Robot:
 
     def pid_align(
         self,
-        pid: PIDValues = PIDValues(target=30, kp=2, ki=0.001, kd=0.3),
+        pid: PIDValues = PIDValues(target=65, kp=0.7, ki=0.02, kd=0.2),
         sensor_function_l=None,
         sensor_function_r=None,
         direction_sign=1,
@@ -710,9 +710,9 @@ class Robot:
         Alinha usando os dois pares (motor - sensor de cor) e controle PID.
         """
         if sensor_function_l is None:
-            sensor_function_l = self.color_fl.reflection
+            sensor_function_l = lambda: self.color_fl.rgb()[2]
         if sensor_function_r is None:
-            sensor_function_r = self.color_fr.reflection
+            sensor_function_r = lambda: self.color_fr.rgb()[2]
         correction_factor = 0.9
         left_error_i = 0
         right_error_i = 0

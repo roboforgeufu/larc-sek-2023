@@ -21,11 +21,7 @@ def chess_tower(robot: Robot):
             get_closer_to_obstacle_routine(robot)
         else:
             robot.pid_walk(cm=2, speed=-30)
-            robot.pid_align(
-                PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
-                sensor_function_l=lambda: robot.color_fl.rgb()[2],
-                sensor_function_r=lambda: robot.color_fr.rgb()[2],
-            )
+            robot.pid_align()
             robot.pid_walk(cm=1, speed=30)
             last_color_l, last_color_r = robot.color_fl.color(), robot.color_fr.color()
 
@@ -82,16 +78,13 @@ def chess_tower(robot: Robot):
         if i % 2 == 0:
             robot.pid_turn(90)
         else:
-            robot.pid_turn(180)
+            robot.pid_turn(90)
+            robot.pid_turn(90)
 
 
 def calibra_pid_align(robot: Robot):
     while True:
-        robot.pid_align(
-            PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-            sensor_function_l=lambda: robot.color_fl.rgb()[2],
-            sensor_function_r=lambda: robot.color_fr.rgb()[2],
-        )
+        robot.pid_align()
         wait_button_pressed(robot.brick)
 
 
@@ -105,11 +98,7 @@ def case_a_routine(robot: Robot):
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
     )
-    robot.pid_align(
-        PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
-        sensor_function_l=lambda: robot.color_fl.rgb()[2],
-        sensor_function_r=lambda: robot.color_fr.rgb()[2],
-    )
+    robot.pid_align()
     # Azul de frente
     robot.pid_walk(cm=10, speed=-80)
     robot.pid_turn(90)
@@ -127,26 +116,21 @@ def triple_case_routine(robot: Robot):
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
     )
-    robot.pid_align(
-        PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
-        sensor_function_l=lambda: robot.color_fl.rgb()[2],
-        sensor_function_r=lambda: robot.color_fr.rgb()[2],
-    )
+    robot.pid_align()
     robot.pid_walk(cm=1, speed=30)
     # posicao F chega no preto
     if (robot.color_fl.color() == Color.BLACK) or (
         robot.color_fr.color() == Color.BLACK
     ):
         robot.forward_while_same_reflection(
-            speed_l=-50,
-            speed_r=-50,
+            speed_l=-30,
+            speed_r=-30,
             reflection_diff=22,
             avoid_obstacles=False,
             left_reflection_function=lambda: robot.color_bl.rgb()[2],
             right_reflection_function=lambda: robot.color_br.rgb()[2],
         )
         robot.pid_align(
-            PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
             sensor_function_l=lambda: robot.color_bl.rgb()[2],
             sensor_function_r=lambda: robot.color_br.rgb()[2],
             direction_sign=-1,
@@ -156,11 +140,7 @@ def triple_case_routine(robot: Robot):
         robot.pid_turn(-90)
 
     else:
-        robot.pid_align(
-            PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
-            sensor_function_l=lambda: robot.color_fl.rgb()[2],
-            sensor_function_r=lambda: robot.color_fr.rgb()[2],
-        )
+        robot.pid_align()
         # Azul de frente
         robot.pid_walk(cm=10, speed=-80)
         robot.pid_turn(90)
@@ -181,11 +161,7 @@ def check_three_colors(robot: Robot, last_color):
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
     )
     robot.pid_walk(cm=2, speed=-30)
-    robot.pid_align(
-        PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
-        sensor_function_l=lambda: robot.color_fl.rgb()[2],
-        sensor_function_r=lambda: robot.color_fr.rgb()[2],
-    )
+    robot.pid_align()
     robot.pid_walk(cm=1, speed=20)
 
     robot.ev3_print(robot.color_fl.color())
@@ -197,8 +173,8 @@ def check_three_colors(robot: Robot, last_color):
     three_colors_r.append(robot.color_fr.color())
 
     robot.forward_while_same_reflection(
-        speed_l=-50,
-        speed_r=-50,
+        speed_l=-30,
+        speed_r=-30,
         reflection_diff=22,
         avoid_obstacles=False,
         left_reflection_function=lambda: robot.color_bl.rgb()[2],
@@ -253,13 +229,10 @@ def go_to_origin_routine(robot: Robot):
         avoid_obstacles=False,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
+        fix_errors=False
     )
     robot.pid_walk(cm=2, speed=-30)
-    robot.pid_align(
-        PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
-        sensor_function_l=lambda: robot.color_fl.rgb()[2],
-        sensor_function_r=lambda: robot.color_fr.rgb()[2],
-    )
+    robot.pid_align()
     # chega na origem
     robot.pid_walk(cm=3, speed=-30)
     robot.pid_turn(-90)
@@ -268,17 +241,13 @@ def go_to_origin_routine(robot: Robot):
         avoid_obstacles=False,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
+        fix_errors=True
     )
     robot.pid_walk(cm=2, speed=-30)
-    robot.pid_align(
-        PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
-        sensor_function_l=lambda: robot.color_fl.rgb()[2],
-        sensor_function_r=lambda: robot.color_fr.rgb()[2],
-    )
+    robot.pid_align()
     robot.pid_walk(cm=3, speed=-30)
     robot.pid_turn(-90)
     robot.pid_align(
-        PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
         sensor_function_l=lambda: robot.color_bl.rgb()[2],
         sensor_function_r=lambda: robot.color_br.rgb()[2],
         direction_sign=-1,

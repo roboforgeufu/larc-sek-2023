@@ -16,11 +16,7 @@ def deliver_person_ahead(robot: Robot):
             fix_errors=False,
         )
         robot.pid_walk(cm=2, speed=-30)
-        robot.pid_align(
-            PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
-            sensor_function_l=lambda: robot.color_fl.rgb()[2],
-            sensor_function_r=lambda: robot.color_fr.rgb()[2],
-        )
+        robot.pid_align()
         robot.pid_walk(cm=2, speed=30)
 
         right_color = robot.color_fr.color()

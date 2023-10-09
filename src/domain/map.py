@@ -167,7 +167,9 @@ def set_path_routine(goal, start):
 
     if start == ORIGIN_TUPLE:
         first_left_turn_index = path_movements_list.index("curva_esquerda")
-        path_movements_list.insert((first_left_turn_index + 1), "alinha_atras")
+        path_movements_list.insert((first_left_turn_index + 1), "alinha_frente")
+        path_movements_list = path_movements_list[first_left_turn_index:]
+            
     if goal != ORIGIN_TUPLE:
         last_movement_index = len(path_movements_list) - 1
         path_movements_list.pop(last_movement_index)
@@ -183,6 +185,7 @@ def set_path_routine(goal, start):
             path_movements_list.append(movement)
     if goal == ORIGIN_TUPLE:
         path_movements_list = path_movements_list[2:]
+    
 
     return path_movements_list
 
@@ -279,15 +282,11 @@ def path_to_movement(robot: Robot, goal, start=None):
                 right_reflection_function=lambda: robot.color_fr.rgb()[2],
             )
             robot.pid_walk(cm=2, speed=-30)
-            robot.pid_align(
-                PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
-                sensor_function_l=lambda: robot.color_fl.rgb()[2],
-                sensor_function_r=lambda: robot.color_fr.rgb()[2],
-            )
+            robot.pid_align()
         elif movement == "alinha_frente":
             robot.forward_while_same_reflection(
-                speed_l=-50,
-                speed_r=-50,
+                speed_l=-30,
+                speed_r=-30,
                 reflection_diff=22,
                 avoid_obstacles=False,
                 left_reflection_function=lambda: robot.color_bl.rgb()[2],
@@ -295,7 +294,6 @@ def path_to_movement(robot: Robot, goal, start=None):
             )
             robot.pid_walk(cm=2, speed=30)
             robot.pid_align(
-                PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
                 sensor_function_l=lambda: robot.color_bl.rgb()[2],
                 sensor_function_r=lambda: robot.color_br.rgb()[2],
                 direction_sign=-1,
