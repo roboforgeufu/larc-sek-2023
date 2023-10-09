@@ -12,7 +12,6 @@ Não devem estar nesse módulo:
 
 import math
 
-import constants as const
 from pybricks.ev3devices import ColorSensor, InfraredSensor, Motor, UltrasonicSensor
 from pybricks.hubs import EV3Brick
 from pybricks.messaging import (
@@ -23,6 +22,8 @@ from pybricks.messaging import (
 )
 from pybricks.parameters import Color, Port
 from pybricks.tools import StopWatch, wait
+
+import constants as const
 from sensor_decision_trees import (
     DecisionColorSensor,
     momo_s3_decision_tree,
@@ -198,6 +199,7 @@ class Robot:
         ),
         left_reflection_function=None,
         right_reflection_function=None,
+        fix_errors=True,
     ):
         """
         Move ambos os motores (de forma individual) até que a intensidade de reflexão
@@ -222,6 +224,9 @@ class Robot:
         prev_motor_error = 0
 
         has_seen_obstacle = False
+
+        stopped_l = False
+        stopped_r = False
 
         diff_ref_r = 0
         diff_ref_l = 0
@@ -264,23 +269,35 @@ class Robot:
 
             if abs(diff_ref_r) < reflection_diff:
                 self.motor_r.dc(speed_r - pid_speed)
-            else:
+            elif fix_errors:
                 self.motor_r.dc(
                     ((speed_r) / abs(speed_r))
                     * (speed_r + pid_speed + const.FORWARD_SPEED_CORRECTION)
                 )
                 initial_motor_r_angle = self.motor_r.angle()
                 initial_motor_l_angle = self.motor_l.angle()
+            else:
+                if not stopped_r:
+                    stopped_r = True
+                self.motor_r.hold()
 
             if abs(diff_ref_l) < reflection_diff:
                 self.motor_l.dc(speed_l + pid_speed)
-            else:
+            elif fix_errors:
                 self.motor_l.dc(
                     ((speed_l) / abs(speed_l))
                     * (speed_l + pid_speed + const.FORWARD_SPEED_CORRECTION)
                 )
                 initial_motor_l_angle = self.motor_l.angle()
                 initial_motor_r_angle = self.motor_r.angle()
+            else:
+                if not stopped_l:
+                    stopped_l = True
+                self.motor_l.hold()
+
+            if stopped_r and stopped_l:
+                break
+
         self.off_motors()
         return has_seen_obstacle
 
