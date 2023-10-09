@@ -1,9 +1,13 @@
 from robot import Robot
 from utils import PIDValues
 from pybricks.tools import wait
+from pybricks.parameters import Stop
 
 
 def passenger_boarding(robot: Robot):
+    robot.line_grabber(vel=20, time=3000, sensor=robot.color_fr)
+    robot.pid_walk(speed=-30, cm=8)
+
     robot.stop_mail_box.send(0)
     robot.infra_side_box.wait()
     robot.pid_line_follower(
@@ -29,7 +33,7 @@ def passenger_boarding(robot: Robot):
     # Parada 1
     robot.pid_walk(speed=30, cm=1.5)
     robot.pid_turn(90)
-    robot.pid_walk(speed=-30, cm=3)
+    robot.pid_walk(speed=-30, cm=1)
     robot.pid_align()
     robot.pid_walk(speed=30, cm=5)
 
@@ -67,6 +71,7 @@ def passenger_boarding(robot: Robot):
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
         fix_errors=False
     )
+    robot.pid_walk(speed=-30, cm=1)
     robot.pid_align()
     robot.pid_walk(speed=-30, cm=10)
     robot.pid_turn(90)
@@ -79,6 +84,8 @@ def passenger_boarding(robot: Robot):
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
         fix_errors=False,
     )
+    robot.pid_walk(speed=-30, cm=1)
+
     robot.pid_align()
     robot.pid_walk(speed=-30, cm=10)
     robot.pid_turn(-90)

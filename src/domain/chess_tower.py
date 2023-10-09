@@ -229,7 +229,6 @@ def go_to_origin_routine(robot: Robot):
         avoid_obstacles=False,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
-        fix_errors=False
     )
     robot.pid_walk(cm=2, speed=-30)
     robot.pid_align()
@@ -245,10 +244,11 @@ def go_to_origin_routine(robot: Robot):
     )
     robot.pid_walk(cm=2, speed=-30)
     robot.pid_align()
-    robot.pid_walk(cm=3, speed=-30)
+    robot.pid_walk(cm=2, speed=-30)
     robot.pid_turn(-90)
     robot.pid_align(
         sensor_function_l=lambda: robot.color_bl.rgb()[2],
         sensor_function_r=lambda: robot.color_br.rgb()[2],
         direction_sign=-1,
     )
+    #robot.pid_walk(cm=1, speed=30)

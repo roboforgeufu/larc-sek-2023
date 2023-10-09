@@ -188,8 +188,8 @@ class Robot:
 
     def forward_while_same_reflection(
         self,
-        speed_r=40,
-        speed_l=40,
+        speed_r=60,
+        speed_l=60,
         reflection_diff=10,
         avoid_obstacles=False,
         pid: PIDValues = PIDValues(

@@ -195,7 +195,7 @@ def test_appa_main(appa: Robot):
 
     if passenger_info[0] == "ADULT":
         if passenger_info[1] == "Color.BLUE":
-            goal = (8, 4)  # museu
+            goal = (8, 4)  # museu 
         elif passenger_info[1] == "Color.BROWN":
             goal = (0, 4)  # padaria
         elif passenger_info[1] == "Color.GREEN":

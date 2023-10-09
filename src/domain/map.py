@@ -3,7 +3,7 @@ from math import sqrt
 from constants import ORIGIN_TUPLE
 from robot import Robot
 from utils import PIDValues
-from chess_tower import go_to_origin_routine
+from domain.chess_tower import go_to_origin_routine
 
 # 12 de largura, 9 de altura
 city_map = [
@@ -202,7 +202,7 @@ def set_path_routine(goal, start):
                 break
             i -= 1
         path_movements_list.insert(i, "alinha_frente")
-        path_movements_list.insert(i+1, (-10))
+        path_movements_list.insert(i+1, (-5))
 
     return path_movements_list
 
