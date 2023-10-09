@@ -182,7 +182,7 @@ def set_path_routine(goal, start):
         for movement in alignment_routine:
             path_movements_list.append(movement)
     if goal == ORIGIN_TUPLE:
-        path_movements_list = path_movements_list[2::]
+        path_movements_list = path_movements_list[2:]
 
     return path_movements_list
 
@@ -300,3 +300,32 @@ def path_to_movement(robot: Robot, goal, start=None):
                 sensor_function_r=lambda: robot.color_br.rgb()[2],
                 direction_sign=-1,
             )
+
+
+def decide_passenger_goal(passenger_info, park_flag):
+    passenger_info = passenger_info.split()
+    if passenger_info[0] == "CHILD":
+        if passenger_info[1] == "Color.BLUE":
+            goal = (0, 8)  # escola
+        elif passenger_info[1] == "Color.BROWN":
+            goal = (8, 8)  # biblioteca
+        elif passenger_info[1] == "Color.GREEN":
+            if park_flag == 0:  # parque
+                goal = (8, 0)
+            elif park_flag == 1:
+                goal = (4, 0)
+            elif park_flag == 2:
+                goal = (0, 0)
+            park_flag += 1
+
+    if passenger_info[0] == "ADULT":
+        if passenger_info[1] == "Color.BLUE":
+            goal = (8, 4)  # museu
+        elif passenger_info[1] == "Color.BROWN":
+            goal = (0, 4)  # padaria
+        elif passenger_info[1] == "Color.GREEN":
+            goal = (4, 8)  # prefeitura
+        elif passenger_info[1] == "Color.RED":
+            goal = (4, 4)  # farmacia
+
+    return goal, park_flag
