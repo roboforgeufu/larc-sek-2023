@@ -1,5 +1,6 @@
 from robot import Robot
 from utils import PIDValues
+from pybricks.tools import wait
 
 
 def passenger_boarding(robot: Robot):
@@ -8,11 +9,17 @@ def passenger_boarding(robot: Robot):
     robot.pid_line_follower(
         vel=60,
         pid=PIDValues(
-            target=35,
+            target=65,
             kp=0.7,
-            ki=0.05,
-            kd=10,
+            ki=0.02,
+            kd=0.2,
         ),
+        # pid=PIDValues(
+        #     target=35,
+        #     kp=0.7,
+        #     ki=0.05,
+        #     kd=10,
+        # ),
         loop_condition=lambda: (
             robot.color_fl.rgb()[2] > 50 and (robot.infra_side_box.read() or 100) > 3
         ),
@@ -20,7 +27,7 @@ def passenger_boarding(robot: Robot):
     robot.stop_mail_box.send(1)
 
     # Parada 1
-    robot.pid_walk(speed=-30, cm=1.5)
+    robot.pid_walk(speed=30, cm=1.5)
     robot.pid_turn(90)
     robot.pid_walk(speed=-30, cm=3)
     robot.pid_align()
@@ -89,3 +96,31 @@ def passenger_boarding(robot: Robot):
     robot.pid_turn(-90)
 
     return passenger_info
+
+
+def momo_passenger_boarding(robot: Robot):
+    while True:
+        robot.stop_mail_box.wait_new()
+        if robot.stop_mail_box.read() == 0:
+            break
+
+    robot.infra_side_box.send(robot.infra_side.distance())
+    while robot.stop_mail_box.read() == 0:
+        robot.infra_side_box.send(robot.infra_side.distance())
+        wait(10)
+    # Parada 1
+
+    # Parada 2
+    robot.stop_mail_box.wait_new()
+    robot.motor_claw.run_until_stalled(-500, then=Stop.HOLD)
+
+    # Parada 3
+    distance = robot.ultra_front.distance()
+    robot.ev3_print("DIST:", distance)
+    if distance > 60:
+        age = "CHILD"
+    else:
+        age = "ADULT"
+    robot.mbox.send(str(age) + " " + str(robot.color_front.color()))
+
+    # Parada 4
