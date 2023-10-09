@@ -26,7 +26,7 @@ from pybricks.parameters import Color, Port, Stop
 from pybricks.tools import wait
 
 import constants as const
-from domain.boarding import passenger_boarding
+from domain.boarding import passenger_boarding, momo_passenger_boarding
 from domain.chess_tower import chess_tower
 from domain.delivery import deliver_person_ahead
 from domain.map import decide_passenger_goal, path_to_movement
@@ -80,31 +80,7 @@ def momo_main(momo: Robot):
     #
 
     while True:
-        while True:
-            momo.stop_mail_box.wait_new()
-            if momo.stop_mail_box.read() == 0:
-                break
-
-        momo.infra_side_box.send(momo.infra_side.distance())
-        while momo.stop_mail_box.read() == 0:
-            momo.infra_side_box.send(momo.infra_side.distance())
-            wait(10)
-        # Parada 1
-
-        # Parada 2
-        momo.stop_mail_box.wait_new()
-        momo.motor_claw.run_until_stalled(-500, then=Stop.HOLD)
-
-        # Parada 3
-        distance = momo.ultra_front.distance()
-        momo.ev3_print("DIST:", distance)
-        if distance > 60:
-            age = "CHILD"
-        else:
-            age = "ADULT"
-        momo.mbox.send(str(age) + " " + str(momo.color_front.color()))
-
-        # Parada 4
+        momo_passenger_boarding(momo)
 
         #
         # Retorno para a origem
