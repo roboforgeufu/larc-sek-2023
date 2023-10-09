@@ -100,7 +100,7 @@ def appa_main(appa: Robot):
         right_reflection_function=lambda: appa.color_fr.rgb()[2],
     )
     appa.pid_align(
-        PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+        PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
         sensor_function_l=lambda: appa.color_fl.rgb()[2],
         sensor_function_r=lambda: appa.color_fr.rgb()[2],
     )
@@ -125,7 +125,7 @@ def appa_main(appa: Robot):
         right_reflection_function=lambda: appa.color_fr.rgb()[2],
     )
     appa.pid_align(
-        PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+        PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
         sensor_function_l=lambda: appa.color_fl.rgb()[2],
         sensor_function_r=lambda: appa.color_fr.rgb()[2],
     )
@@ -138,7 +138,7 @@ def appa_main(appa: Robot):
         right_reflection_function=lambda: appa.color_fr.rgb()[2],
     )
     appa.pid_align(
-        PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+        PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
         sensor_function_l=lambda: appa.color_fl.rgb()[2],
         sensor_function_r=lambda: appa.color_fr.rgb()[2],
     )
@@ -188,7 +188,7 @@ def appa_main(appa: Robot):
     # Retorno a origem
     #
 
-    path_to_movement(appa, (8, 10), start=goal)
+    path_to_movement(appa, const.ORIGIN_TUPLE, start=goal)
 
 
 def momo_main(momo: Robot):

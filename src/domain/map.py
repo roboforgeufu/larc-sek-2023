@@ -1,7 +1,8 @@
 from math import sqrt
-from robot import Robot
-from utils import PIDValues
-from constants import ORIGIN_TUPLE
+# from robot import Robot
+# from utils import PIDValues
+# from constants import ORIGIN_TUPLE
+ORIGIN_TUPLE = (8,10)
 
 
 # 12 de largura, 9 de altura
@@ -112,6 +113,8 @@ def set_path_routine(
         alignment_routine = ["alinha_frente", -5, "curva_esquerda", "curva_esquerda", "alinha_frente", -5]
         for movement in alignment_routine:
             path_movements_list.append(movement)
+    if goal == ORIGIN_TUPLE:
+        path_movements_list = path_movements_list[2::]
 
     return path_movements_list
 
@@ -183,7 +186,7 @@ def find_turns(path_list):
 
 
 def path_to_movement(
-        robot: Robot,
+        # robot: Robot,
         goal,
         start=None
 ):
@@ -192,42 +195,44 @@ def path_to_movement(
         start = ORIGIN_TUPLE
     movement_list = set_path_routine(goal,start)
     print(movement_list)
-    for movement in movement_list:
-        if (isinstance(movement, int) and movement != 0):
-            if movement > 0:
-                robot.pid_walk(cm=movement, speed=-80)
-            else:
-                robot.pid_walk(cm=movement, speed=80)
-        elif (movement == "curva_direita"):
-            robot.pid_turn(90)
-        elif (movement == "curva_esquerda"):
-            robot.pid_turn(-90)
-        elif (movement == "alinha_atras"):
-            robot.forward_while_same_reflection(
-                reflection_diff=22,
-                avoid_obstacles=False,
-                left_reflection_function=lambda: robot.color_fl.rgb()[2],
-                right_reflection_function=lambda: robot.color_fr.rgb()[2],
-            )
-            robot.pid_walk(cm=2, speed=-30)
-            robot.pid_align(
-                PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
-                sensor_function_l=lambda: robot.color_fl.rgb()[2],
-                sensor_function_r=lambda: robot.color_fr.rgb()[2],
-            )
-        elif (movement == "alinha_frente"):
-            robot.forward_while_same_reflection(
-                speed_l=-50,
-                speed_r=-50,
-                reflection_diff=22,
-                avoid_obstacles=False,
-                left_reflection_function=lambda: robot.color_bl.rgb()[2],
-                right_reflection_function=lambda: robot.color_br.rgb()[2],
-            )
-            robot.pid_walk(cm=2, speed=30)
-            robot.pid_align(
-                PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
-                sensor_function_l=lambda: robot.color_bl.rgb()[2],
-                sensor_function_r=lambda: robot.color_br.rgb()[2],
-                direction_sign=-1,
-            )
+    # for movement in movement_list:
+    #     if (isinstance(movement, int) and movement != 0):
+    #         if movement > 0:
+    #             robot.pid_walk(cm=movement, speed=-80)
+    #         else:
+    #             robot.pid_walk(cm=movement, speed=80)
+    #     elif (movement == "curva_direita"):
+    #         robot.pid_turn(90)
+    #     elif (movement == "curva_esquerda"):
+    #         robot.pid_turn(-90)
+    #     elif (movement == "alinha_atras"):
+    #         robot.forward_while_same_reflection(
+    #             reflection_diff=22,
+    #             avoid_obstacles=False,
+    #             left_reflection_function=lambda: robot.color_fl.rgb()[2],
+    #             right_reflection_function=lambda: robot.color_fr.rgb()[2],
+    #         )
+    #         robot.pid_walk(cm=2, speed=-30)
+    #         robot.pid_align(
+    #             PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
+    #             sensor_function_l=lambda: robot.color_fl.rgb()[2],
+    #             sensor_function_r=lambda: robot.color_fr.rgb()[2],
+    #         )
+    #     elif (movement == "alinha_frente"):
+    #         robot.forward_while_same_reflection(
+    #             speed_l=-50,
+    #             speed_r=-50,
+    #             reflection_diff=22,
+    #             avoid_obstacles=False,
+    #             left_reflection_function=lambda: robot.color_bl.rgb()[2],
+    #             right_reflection_function=lambda: robot.color_br.rgb()[2],
+    #         )
+    #         robot.pid_walk(cm=2, speed=30)
+    #         robot.pid_align(
+    #             PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
+    #             sensor_function_l=lambda: robot.color_bl.rgb()[2],
+    #             sensor_function_r=lambda: robot.color_br.rgb()[2],
+    #             direction_sign=-1,
+    #         )
+
+path_to_movement(ORIGIN_TUPLE, start=(4,4))
