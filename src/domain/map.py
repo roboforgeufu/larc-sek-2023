@@ -1,8 +1,8 @@
 from math import sqrt
+
+from constants import ORIGIN_TUPLE
 from robot import Robot
 from utils import PIDValues
-from constants import ORIGIN_TUPLE
-
 
 # 12 de largura, 9 de altura
 city_map = [
@@ -76,28 +76,90 @@ def a_star(start: tuple[int, int], goal, heuristic):
     return -1
 
 
-def set_path_routine(
-        goal,
-        start
-):
-
+def set_path_routine(goal, start):
     path_positions_list = a_star(start, goal, euclidian_distance)
-    zero_size_elements = [(0,1),(0,3),(0,5),(0,7),(0,9),
-                          (1,0),(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),(1,8),(1,9),(1,10),(1,11),
-                          (2,1),(2,3),(2,5),(2,7),(2,9),
-                          (3,0),(3,1),(3,2),(3,3),(3,4),(3,5),(3,6),(3,7),(3,8),(3,9),(3,10),(3,11),
-                          (4,1),(4,3),(4,5),(4,7),(4,9),
-                          (5,0),(5,1),(5,2),(5,3),(5,4),(5,5),(5,6),(5,7),(5,8),(5,9),(5,10),(5,11),
-                          (6,1),(6,3),(6,5),(6,7),(6,9),
-                          (7,0),(7,1),(7,2),(7,3),(7,4),(7,5),(7,6),(7,7),(7,8),(7,9),(7,10),(7,11),
-                          (8,1),(8,3),(8,5),(8,7),(8,9)]
+    zero_size_elements = [
+        (0, 1),
+        (0, 3),
+        (0, 5),
+        (0, 7),
+        (0, 9),
+        (1, 0),
+        (1, 1),
+        (1, 2),
+        (1, 3),
+        (1, 4),
+        (1, 5),
+        (1, 6),
+        (1, 7),
+        (1, 8),
+        (1, 9),
+        (1, 10),
+        (1, 11),
+        (2, 1),
+        (2, 3),
+        (2, 5),
+        (2, 7),
+        (2, 9),
+        (3, 0),
+        (3, 1),
+        (3, 2),
+        (3, 3),
+        (3, 4),
+        (3, 5),
+        (3, 6),
+        (3, 7),
+        (3, 8),
+        (3, 9),
+        (3, 10),
+        (3, 11),
+        (4, 1),
+        (4, 3),
+        (4, 5),
+        (4, 7),
+        (4, 9),
+        (5, 0),
+        (5, 1),
+        (5, 2),
+        (5, 3),
+        (5, 4),
+        (5, 5),
+        (5, 6),
+        (5, 7),
+        (5, 8),
+        (5, 9),
+        (5, 10),
+        (5, 11),
+        (6, 1),
+        (6, 3),
+        (6, 5),
+        (6, 7),
+        (6, 9),
+        (7, 0),
+        (7, 1),
+        (7, 2),
+        (7, 3),
+        (7, 4),
+        (7, 5),
+        (7, 6),
+        (7, 7),
+        (7, 8),
+        (7, 9),
+        (7, 10),
+        (7, 11),
+        (8, 1),
+        (8, 3),
+        (8, 5),
+        (8, 7),
+        (8, 9),
+    ]
 
     path_with_curves = find_turns(path_positions_list)
     path_movements_list = ghost_busters(zero_size_elements, path_with_curves)
 
     i = 0
     for path in path_movements_list:
-        if(isinstance(path, tuple)):
+        if isinstance(path, tuple):
             path_movements_list[i] = 30
         i += 1
 
@@ -105,11 +167,18 @@ def set_path_routine(
 
     if start == ORIGIN_TUPLE:
         first_left_turn_index = path_movements_list.index("curva_esquerda")
-        path_movements_list.insert((first_left_turn_index+1),"alinha_atras")
+        path_movements_list.insert((first_left_turn_index + 1), "alinha_atras")
     if goal != ORIGIN_TUPLE:
-        last_movement_index = len(path_movements_list)-1
+        last_movement_index = len(path_movements_list) - 1
         path_movements_list.pop(last_movement_index)
-        alignment_routine = ["alinha_frente", -5, "curva_esquerda", "curva_esquerda", "alinha_frente", -5]
+        alignment_routine = [
+            "alinha_frente",
+            -5,
+            "curva_esquerda",
+            "curva_esquerda",
+            "alinha_frente",
+            -5,
+        ]
         for movement in alignment_routine:
             path_movements_list.append(movement)
 
@@ -117,12 +186,12 @@ def set_path_routine(
 
 
 def ghost_busters(ghosts, busters):
-#busters: é a lista de caminho
-#ghosts: é a lista de quadrados fantasmas
+    # busters: é a lista de caminho
+    # ghosts: é a lista de quadrados fantasmas
     i = 0
-    while(i < len(busters)):
+    while i < len(busters):
         for ghost in ghosts:
-            if (busters[i] == ghost):
+            if busters[i] == ghost:
                 busters[i] = 0
         i += 1
     return busters
@@ -130,79 +199,77 @@ def ghost_busters(ghosts, busters):
 
 def find_turns(path_list):
     find_turn_list = []
-    for i in range(len(path_list)-1):
-        element = (path_list[i+1][0]-path_list[i][0], path_list[i+1][1]-path_list[i][1])
-        if element == (-1,0):
+    for i in range(len(path_list) - 1):
+        element = (
+            path_list[i + 1][0] - path_list[i][0],
+            path_list[i + 1][1] - path_list[i][1],
+        )
+        if element == (-1, 0):
             find_turn_list.append("N")
-        elif element == (1,0):
+        elif element == (1, 0):
             find_turn_list.append("S")
-        elif element == (0,1):
+        elif element == (0, 1):
             find_turn_list.append("L")
-        elif element == (0,-1):
+        elif element == (0, -1):
             find_turn_list.append("O")
         i += 1
 
-    i=0
-    while i < (len(find_turn_list)-1):
-        if (find_turn_list[i] != find_turn_list[i+1]):
-
+    i = 0
+    while i < (len(find_turn_list) - 1):
+        if find_turn_list[i] != find_turn_list[i + 1]:
             if find_turn_list[i] == "N":
-                if find_turn_list[i+1] == "O":
-                    path_list.insert(i+2, "curva_esquerda")
-                    find_turn_list.insert(i+1, "curva_esquerda")
+                if find_turn_list[i + 1] == "O":
+                    path_list.insert(i + 2, "curva_esquerda")
+                    find_turn_list.insert(i + 1, "curva_esquerda")
                 else:
-                    path_list.insert(i+2, "curva_direita")
-                    find_turn_list.insert(i+1, "curva_direita")
+                    path_list.insert(i + 2, "curva_direita")
+                    find_turn_list.insert(i + 1, "curva_direita")
 
             elif find_turn_list[i] == "S":
-                if find_turn_list[i+1] == "L":
-                    path_list.insert(i+2, "curva_esquerda")
-                    find_turn_list.insert(i+1, "curva_esquerda")
+                if find_turn_list[i + 1] == "L":
+                    path_list.insert(i + 2, "curva_esquerda")
+                    find_turn_list.insert(i + 1, "curva_esquerda")
                 else:
-                    path_list.insert(i+2, "curva_direita")
-                    find_turn_list.insert(i+1, "curva_direita")
+                    path_list.insert(i + 2, "curva_direita")
+                    find_turn_list.insert(i + 1, "curva_direita")
 
             elif find_turn_list[i] == "L":
-                if find_turn_list[i+1] == "N":
-                    path_list.insert(i+2, "curva_esquerda")
-                    find_turn_list.insert(i+1, "curva_esquerda")
+                if find_turn_list[i + 1] == "N":
+                    path_list.insert(i + 2, "curva_esquerda")
+                    find_turn_list.insert(i + 1, "curva_esquerda")
                 else:
-                    path_list.insert(i+2, "curva_direita")
-                    find_turn_list.insert(i+1, "curva_direita")
+                    path_list.insert(i + 2, "curva_direita")
+                    find_turn_list.insert(i + 1, "curva_direita")
 
             elif find_turn_list[i] == "O":
-                if find_turn_list[i+1] == "S":
-                    path_list.insert(i+2, "curva_esquerda")
-                    find_turn_list.insert(i+1, "curva_esquerda")
+                if find_turn_list[i + 1] == "S":
+                    path_list.insert(i + 2, "curva_esquerda")
+                    find_turn_list.insert(i + 1, "curva_esquerda")
                 else:
-                    path_list.insert(i+2, "curva_direita")
-                    find_turn_list.insert(i+1, "curva_direita")
+                    path_list.insert(i + 2, "curva_direita")
+                    find_turn_list.insert(i + 1, "curva_direita")
         i += 1
 
     return path_list
 
 
-def path_to_movement(
-        robot: Robot,
-        goal,
-        start=None
-):
+def path_to_movement(robot: Robot, goal, start=None):
     # as direcoes sao invertidas pois o robo anda de ré
     if start is None:
         start = ORIGIN_TUPLE
-    movement_list = set_path_routine(goal,start)
+    movement_list = set_path_routine(goal, start)
     print(movement_list)
     for movement in movement_list:
-        if (isinstance(movement, int) and movement != 0):
+        if isinstance(movement, int) and movement != 0:
             if movement > 0:
                 robot.pid_walk(cm=movement, speed=-80)
             else:
                 robot.pid_walk(cm=movement, speed=80)
-        elif (movement == "curva_direita"):
+        elif movement == "curva_direita":
             robot.pid_turn(90)
-        elif (movement == "curva_esquerda"):
+        elif movement == "curva_esquerda":
             robot.pid_turn(-90)
-        elif (movement == "alinha_atras"):
+        elif movement == "alinha_atras":
             robot.forward_while_same_reflection(
                 reflection_diff=22,
                 avoid_obstacles=False,
@@ -215,7 +282,7 @@ def path_to_movement(
                 sensor_function_l=lambda: robot.color_fl.rgb()[2],
                 sensor_function_r=lambda: robot.color_fr.rgb()[2],
             )
-        elif (movement == "alinha_frente"):
+        elif movement == "alinha_frente":
             robot.forward_while_same_reflection(
                 speed_l=-50,
                 speed_r=-50,

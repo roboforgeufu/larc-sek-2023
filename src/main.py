@@ -27,6 +27,7 @@ from pybricks.tools import wait
 
 import constants as const
 from domain.chess_tower import chess_tower
+from domain.delivery import deliver_person_ahead
 from domain.map import path_to_movement
 from robot import Robot
 from utils import PIDValues, ev3_print, get_hostname, wait_button_pressed
@@ -148,7 +149,7 @@ def appa_main(appa: Robot):
     # Pathfinding e movimentacao
     #
 
-    park_flag = 0 #fora do loop geral
+    park_flag = 0  # fora do loop geral
     passenger_info = passenger_info.split()
     if passenger_info[0] == "CHILD":
         if passenger_info[1] == "Color.BLUE":
@@ -183,6 +184,8 @@ def appa_main(appa: Robot):
     #
     # Desembarque pessoas
     #
+
+    deliver_person_ahead(appa)
 
     #
     # Retorno a origem
@@ -235,6 +238,8 @@ def momo_main(momo: Robot):
     #
     # Desembarque pessoas
     #
+    momo.stop_mail_box.wait()
+    momo.motor_claw.run_until_stalled(500)
 
     #
     # Retorno a origem
@@ -242,6 +247,9 @@ def momo_main(momo: Robot):
 
 
 def test_appa_main(appa: Robot):
+    appa.stop_mail_box.wait()
+    deliver_person_ahead(appa)
+    return True
     # appa.pid_line_follower(
     #     vel=100,
     #     pid=PIDValues(
@@ -344,7 +352,10 @@ def test_appa_main(appa: Robot):
 
 
 def test_momo_main(momo: Robot):
-    ...
+    momo.motor_claw.run_until_stalled(-500, then=Stop.HOLD)
+    momo.stop_mail_box.send(0)
+    momo.stop_mail_box.wait_new()
+    momo.motor_claw.run_until_stalled(500)
 
 
 def main():
