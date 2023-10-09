@@ -22,11 +22,13 @@ Não devem estar nesse módulo:
 
 # pylint: skip-file
 
-import constants as const
-from domain.chess_tower import chess_tower
-from domain.map import path_to_movement
 from pybricks.parameters import Color, Port, Stop
 from pybricks.tools import wait
+
+import constants as const
+from domain.chess_tower import chess_tower
+from domain.delivery import deliver_person_ahead
+from domain.map import path_to_movement
 from robot import Robot
 from utils import PIDValues, ev3_print, get_hostname, wait_button_pressed
 
@@ -99,7 +101,7 @@ def appa_main(appa: Robot):
         right_reflection_function=lambda: appa.color_fr.rgb()[2],
     )
     appa.pid_align(
-        PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+        PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
         sensor_function_l=lambda: appa.color_fl.rgb()[2],
         sensor_function_r=lambda: appa.color_fr.rgb()[2],
     )
@@ -124,7 +126,7 @@ def appa_main(appa: Robot):
         right_reflection_function=lambda: appa.color_fr.rgb()[2],
     )
     appa.pid_align(
-        PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+        PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
         sensor_function_l=lambda: appa.color_fl.rgb()[2],
         sensor_function_r=lambda: appa.color_fr.rgb()[2],
     )
@@ -137,7 +139,7 @@ def appa_main(appa: Robot):
         right_reflection_function=lambda: appa.color_fr.rgb()[2],
     )
     appa.pid_align(
-        PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+        PIDValues(target=65, kp=0.6, ki=0.005, kd=0.2),
         sensor_function_l=lambda: appa.color_fl.rgb()[2],
         sensor_function_r=lambda: appa.color_fr.rgb()[2],
     )
@@ -147,7 +149,7 @@ def appa_main(appa: Robot):
     # Pathfinding e movimentacao
     #
 
-    park_flag = 0
+    park_flag = 0  # fora do loop geral
     passenger_info = passenger_info.split()
     if passenger_info[0] == "CHILD":
         if passenger_info[1] == "Color.BLUE":
@@ -173,17 +175,23 @@ def appa_main(appa: Robot):
         elif passenger_info[1] == "Color.RED":
             goal = (4, 4)  # farmacia
 
+    appa.ev3_print(passenger_info)
+    appa.ev3_print(goal)
+    # wait_button_pressed(appa.brick)
+
     path_to_movement(appa, goal)
 
     #
     # Desembarque pessoas
     #
 
+    deliver_person_ahead(appa)
+
     #
     # Retorno a origem
     #
 
-    path_to_movement(appa, (8, 10), start=goal)
+    path_to_movement(appa, const.ORIGIN_TUPLE, start=goal)
 
 
 def momo_main(momo: Robot):
@@ -230,6 +238,8 @@ def momo_main(momo: Robot):
     #
     # Desembarque pessoas
     #
+    momo.stop_mail_box.wait()
+    momo.motor_claw.run_until_stalled(500)
 
     #
     # Retorno a origem
@@ -237,6 +247,9 @@ def momo_main(momo: Robot):
 
 
 def test_appa_main(appa: Robot):
+    appa.stop_mail_box.wait()
+    deliver_person_ahead(appa)
+    return True
     # appa.pid_line_follower(
     #     vel=100,
     #     pid=PIDValues(
@@ -256,59 +269,60 @@ def test_appa_main(appa: Robot):
     #
 
     # alinha no azul
-    appa.forward_while_same_reflection(
-        reflection_diff=22,
-        avoid_obstacles=False,
-        left_reflection_function=lambda: appa.color_fl.rgb()[2],
-        right_reflection_function=lambda: appa.color_fr.rgb()[2],
-    )
-    appa.simple_walk(speed=30, cm=-2)
-    appa.pid_align(
-        PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-        sensor_function_l=lambda: appa.color_fl.rgb()[2],
-        sensor_function_r=lambda: appa.color_fr.rgb()[2],
-    )
-    appa.simple_walk(speed=30, cm=-10)
-    appa.pid_turn(90)
+    # appa.forward_while_same_reflection(
+    #     reflection_diff=22,
+    #     avoid_obstacles=False,
+    #     left_reflection_function=lambda: appa.color_fl.rgb()[2],
+    #     right_reflection_function=lambda: appa.color_fr.rgb()[2],
+    # )
+    # appa.simple_walk(speed=30, cm=-2)
+    # appa.pid_align(
+    #     PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+    #     sensor_function_l=lambda: appa.color_fl.rgb()[2],
+    #     sensor_function_r=lambda: appa.color_fr.rgb()[2],
+    # )
+    # appa.simple_walk(speed=30, cm=-10)
+    # appa.pid_turn(90)
 
-    # vai até a origem
-    appa.forward_while_same_reflection(
-        reflection_diff=22,
-        avoid_obstacles=False,
-        left_reflection_function=lambda: appa.color_fl.rgb()[2],
-        right_reflection_function=lambda: appa.color_fr.rgb()[2],
-    )
-    appa.simple_walk(speed=30, cm=-10)
-    appa.pid_turn(90)
+    # # vai até a origem
+    # appa.forward_while_same_reflection(
+    #     reflection_diff=22,
+    #     avoid_obstacles=False,
+    #     left_reflection_function=lambda: appa.color_fl.rgb()[2],
+    #     right_reflection_function=lambda: appa.color_fr.rgb()[2],
+    # )
+    # appa.simple_walk(speed=30, cm=-10)
+    # appa.pid_turn(90)
 
-    # restaura a posicao inicial
-    appa.forward_while_same_reflection(
-        reflection_diff=22,
-        avoid_obstacles=False,
-        left_reflection_function=lambda: appa.color_fl.rgb()[2],
-        right_reflection_function=lambda: appa.color_fr.rgb()[2],
-    )
-    appa.pid_align(
-        PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-        sensor_function_l=lambda: appa.color_fl.rgb()[2],
-        sensor_function_r=lambda: appa.color_fr.rgb()[2],
-    )
-    appa.simple_walk(speed=30, cm=-10)
-    appa.pid_turn(-90)
-    appa.forward_while_same_reflection(
-        reflection_diff=22,
-        avoid_obstacles=False,
-        left_reflection_function=lambda: appa.color_fl.rgb()[2],
-        right_reflection_function=lambda: appa.color_fr.rgb()[2],
-    )
-    appa.pid_align(
-        PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-        sensor_function_l=lambda: appa.color_fl.rgb()[2],
-        sensor_function_r=lambda: appa.color_fr.rgb()[2],
-    )
-    appa.simple_walk(speed=30, cm=-10)
+    # # restaura a posicao inicial
+    # appa.forward_while_same_reflection(
+    #     reflection_diff=22,
+    #     avoid_obstacles=False,
+    #     left_reflection_function=lambda: appa.color_fl.rgb()[2],
+    #     right_reflection_function=lambda: appa.color_fr.rgb()[2],
+    # )
+    # appa.pid_align(
+    #     PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+    #     sensor_function_l=lambda: appa.color_fl.rgb()[2],
+    #     sensor_function_r=lambda: appa.color_fr.rgb()[2],
+    # )
+    # appa.simple_walk(speed=30, cm=-10)
+    # appa.pid_turn(-90)
+    # appa.forward_while_same_reflection(
+    #     reflection_diff=22,
+    #     avoid_obstacles=False,
+    #     left_reflection_function=lambda: appa.color_fl.rgb()[2],
+    #     right_reflection_function=lambda: appa.color_fr.rgb()[2],
+    # )
+    # appa.pid_align(
+    #     PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
+    #     sensor_function_l=lambda: appa.color_fl.rgb()[2],
+    #     sensor_function_r=lambda: appa.color_fr.rgb()[2],
+    # )
+    # appa.simple_walk(speed=30, cm=-10)
 
-    passenger_info = "CHILD Color.BLUE"
+    park_flag = 0
+    passenger_info = "ADULT Color.RED"
     passenger_info = passenger_info.split()
     if passenger_info[0] == "CHILD":
         if passenger_info[1] == "Color.BLUE":
@@ -338,7 +352,10 @@ def test_appa_main(appa: Robot):
 
 
 def test_momo_main(momo: Robot):
-    ...
+    momo.motor_claw.run_until_stalled(-500, then=Stop.HOLD)
+    momo.stop_mail_box.send(0)
+    momo.stop_mail_box.wait_new()
+    momo.motor_claw.run_until_stalled(500)
 
 
 def main():
