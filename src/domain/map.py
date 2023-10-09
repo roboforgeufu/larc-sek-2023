@@ -168,8 +168,14 @@ def set_path_routine(goal, start):
     if start == ORIGIN_TUPLE:
         first_left_turn_index = path_movements_list.index("curva_esquerda")
         path_movements_list.insert((first_left_turn_index + 1), "alinha_frente")
-        path_movements_list = path_movements_list[first_left_turn_index:]
-            
+        i = 0
+        for movement in path_movements_list:
+            if movement == "curva_esquerda":
+                break
+            path_movements_list[i] = (-1) * movement
+            i += 1
+
+
     if goal != ORIGIN_TUPLE:
         last_movement_index = len(path_movements_list) - 1
         path_movements_list.pop(last_movement_index)
