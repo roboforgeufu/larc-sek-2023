@@ -175,7 +175,7 @@ def set_path_routine(goal, start):
                 break
             path_movements_list[i] = (-1) * movement
             i += 1
-        path_movements_list.insert((first_left_turn_index + 2), (-10))
+        path_movements_list.insert((first_left_turn_index + 2), (-5))
         path_movements_list.insert((first_left_turn_index + 3), "curva_esquerda")
         path_movements_list.insert((first_left_turn_index + 4), "curva_esquerda")
 
@@ -195,14 +195,13 @@ def set_path_routine(goal, start):
       
     if goal == ORIGIN_TUPLE:
         path_movements_list = path_movements_list[2:]
-        print(path_movements_list)
         i = (len(path_movements_list)-1)
         while True:
             if path_movements_list[i] == "curva_direita":
                 break
             i -= 1
         path_movements_list.insert(i, "alinha_frente")
-        path_movements_list.insert(i+1, (-10))
+        path_movements_list.insert(i+1, (-5))
 
     return path_movements_list
 
@@ -316,46 +315,46 @@ def path_to_movement(robot: Robot, goal, start=None):
                 direction_sign=-1,
             )
 
-        if goal == ORIGIN_TUPLE:
-            # Apontando pro vermelho
-            robot.forward_while_same_reflection(
-                speed_l=-30,
-                speed_r=-30,
-                reflection_diff=22,
-                avoid_obstacles=False,
-                left_reflection_function=lambda: robot.color_bl.rgb()[2],
-                right_reflection_function=lambda: robot.color_br.rgb()[2],
-            )
-            robot.pid_walk(cm=2, speed=30)
-            robot.pid_align(
-                sensor_function_l=lambda: robot.color_bl.rgb()[2],
-                sensor_function_r=lambda: robot.color_br.rgb()[2],
-                direction_sign=-1,
-            )
-            # chega na origem
-            robot.pid_walk(cm=3, speed=30)
-            robot.pid_turn(-90)
-            robot.forward_while_same_reflection(
-                speed_l=-30,
-                speed_r=-30,
-                reflection_diff=22,
-                avoid_obstacles=False,
-                left_reflection_function=lambda: robot.color_bl.rgb()[2],
-                right_reflection_function=lambda: robot.color_br.rgb()[2],
-            )
-            robot.pid_walk(cm=2, speed=30)
-            robot.pid_align(
-                sensor_function_l=lambda: robot.color_bl.rgb()[2],
-                sensor_function_r=lambda: robot.color_br.rgb()[2],
-                direction_sign=-1,
-            )
-            robot.pid_walk(cm=3, speed=30)
-            robot.pid_turn(-90)
-            robot.pid_align(
-                sensor_function_l=lambda: robot.color_bl.rgb()[2],
-                sensor_function_r=lambda: robot.color_br.rgb()[2],
-                direction_sign=-1,
-            )
+    if goal == ORIGIN_TUPLE:
+        # Apontando pro vermelho
+        robot.forward_while_same_reflection(
+            speed_l=-30,
+            speed_r=-30,
+            reflection_diff=22,
+            avoid_obstacles=False,
+            left_reflection_function=lambda: robot.color_bl.rgb()[2],
+            right_reflection_function=lambda: robot.color_br.rgb()[2],
+        )
+        robot.pid_walk(cm=2, speed=30)
+        robot.pid_align(
+            sensor_function_l=lambda: robot.color_bl.rgb()[2],
+            sensor_function_r=lambda: robot.color_br.rgb()[2],
+            direction_sign=-1,
+        )
+        # chega na origem
+        robot.pid_walk(cm=3, speed=30)
+        robot.pid_turn(-90)
+        robot.forward_while_same_reflection(
+            speed_l=-30,
+            speed_r=-30,
+            reflection_diff=22,
+            avoid_obstacles=False,
+            left_reflection_function=lambda: robot.color_bl.rgb()[2],
+            right_reflection_function=lambda: robot.color_br.rgb()[2],
+        )
+        robot.pid_walk(cm=2, speed=30)
+        robot.pid_align(
+            sensor_function_l=lambda: robot.color_bl.rgb()[2],
+            sensor_function_r=lambda: robot.color_br.rgb()[2],
+            direction_sign=-1,
+        )
+        robot.pid_walk(cm=3, speed=30)
+        robot.pid_turn(-90)
+        robot.pid_align(
+            sensor_function_l=lambda: robot.color_bl.rgb()[2],
+            sensor_function_r=lambda: robot.color_br.rgb()[2],
+            direction_sign=-1,
+        )
 
 
 def decide_passenger_goal(passenger_info, park_flag):
@@ -385,3 +384,6 @@ def decide_passenger_goal(passenger_info, park_flag):
             goal = (4, 4)  # farmacia
 
     return goal, park_flag
+
+path_to_movement((4,8))
+path_to_movement(ORIGIN_TUPLE, start=(4,8))
