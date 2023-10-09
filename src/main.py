@@ -79,48 +79,49 @@ def momo_main(momo: Robot):
     #
 
     while True:
-        momo.stop_mail_box.wait_new()
-        if momo.stop_mail_box.read() == 0:
-            break
+        while True:
+            momo.stop_mail_box.wait_new()
+            if momo.stop_mail_box.read() == 0:
+                break
 
-    momo.infra_side_box.send(momo.infra_side.distance())
-    while momo.stop_mail_box.read() == 0:
         momo.infra_side_box.send(momo.infra_side.distance())
-        wait(10)
-    # Parada 1
+        while momo.stop_mail_box.read() == 0:
+            momo.infra_side_box.send(momo.infra_side.distance())
+            wait(10)
+        # Parada 1
 
-    # Parada 2
-    momo.stop_mail_box.wait_new()
-    momo.motor_claw.run_until_stalled(-500, then=Stop.HOLD)
+        # Parada 2
+        momo.stop_mail_box.wait_new()
+        momo.motor_claw.run_until_stalled(-500, then=Stop.HOLD)
 
-    # Parada 3
-    distance = momo.ultra_front.distance()
-    momo.ev3_print("DIST:", distance)
-    if distance > 60:
-        age = "CHILD"
-    else:
-        age = "ADULT"
-    momo.mbox.send(str(age) + " " + str(momo.color_front.color()))
+        # Parada 3
+        distance = momo.ultra_front.distance()
+        momo.ev3_print("DIST:", distance)
+        if distance > 60:
+            age = "CHILD"
+        else:
+            age = "ADULT"
+        momo.mbox.send(str(age) + " " + str(momo.color_front.color()))
 
-    # Parada 4
+        # Parada 4
 
-    #
-    # Retorno para a origem
-    #
+        #
+        # Retorno para a origem
+        #
 
-    #
-    # Pathfinding e movimentacao
-    #
+        #
+        # Pathfinding e movimentacao
+        #
 
-    #
-    # Desembarque pessoas
-    #
-    momo.stop_mail_box.wait()
-    momo.motor_claw.run_until_stalled(500)
+        #
+        # Desembarque pessoas
+        #
+        momo.stop_mail_box.wait()
+        momo.motor_claw.run_until_stalled(500)
 
-    #
-    # Retorno a origem
-    #
+        #
+        # Retorno a origem
+        #
 
 
 def test_appa_main(appa: Robot):
