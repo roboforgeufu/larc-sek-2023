@@ -117,6 +117,7 @@ class Robot:
             # mailboxes
             self.mbox = TextMailbox("text", self.server)
             self.infra_side_box = NumericMailbox("ultra", self.server)
+            self.obstacle_box = NumericMailbox("obstacle", self.server)
             self.color_front_box = NumericMailbox("color", self.server)
             self.stop_mail_box = NumericMailbox("stop", self.server)
 
@@ -136,6 +137,7 @@ class Robot:
             # mailboxes
             self.mbox = TextMailbox("text", self.client)
             self.infra_side_box = NumericMailbox("ultra", self.client)
+            self.obstacle_box = NumericMailbox("obstacle", self.client)
             self.color_front_box = NumericMailbox("color", self.client)
             self.stop_mail_box = NumericMailbox("stop", self.client)
 
@@ -191,7 +193,7 @@ class Robot:
         speed_r=60,
         speed_l=60,
         reflection_diff=10,
-        avoid_obstacles=False,
+        obstacle_function=None,
         pid: PIDValues = PIDValues(
             kp=1,
             ki=0.001,
@@ -231,7 +233,7 @@ class Robot:
         diff_ref_r = 0
         diff_ref_l = 0
         while abs(diff_ref_l) < reflection_diff or abs(diff_ref_r) < reflection_diff:
-            if avoid_obstacles and self.ultra_front.distance() < const.OBSTACLE_DIST:
+            if obstacle_function is not None and obstacle_function():
                 has_seen_obstacle = True
                 break
 
@@ -803,15 +805,15 @@ class Robot:
 
     def pid_line_grabber(  # pylint: disable=invalid-name
         self,
-        vel,
-        time,
-        sensor: ColorSensor,
         pid: PIDValues = PIDValues(
             target=35,  # medir na linha toda vez
             kp=3.5,
             ki=0.05,
             kd=10,
         ),
+        vel = 20,
+        time = 3000,
+        sensor: ColorSensor = None,
     ):
         """
         O robô usa um dos sensores de cor para encontrar a linha e entrar em posição
