@@ -95,7 +95,6 @@ def case_a_routine(robot: Robot):
     robot.pid_turn(-90)
     robot.forward_while_same_reflection(
         reflection_diff=22,
-        avoid_obstacles=False,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
     )
@@ -113,7 +112,6 @@ def triple_case_routine(robot: Robot):
     # posicao H e C chegam no azul
     robot.forward_while_same_reflection(
         reflection_diff=22,
-        avoid_obstacles=False,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
     )
@@ -127,7 +125,6 @@ def triple_case_routine(robot: Robot):
             speed_l=-30,
             speed_r=-30,
             reflection_diff=22,
-            avoid_obstacles=False,
             left_reflection_function=lambda: robot.color_bl.rgb()[2],
             right_reflection_function=lambda: robot.color_br.rgb()[2],
         )
@@ -157,7 +154,6 @@ def check_three_colors(robot: Robot, last_color):
     robot.pid_turn(-90)
     robot.forward_while_same_reflection(
         reflection_diff=22,
-        avoid_obstacles=False,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
     )
@@ -177,7 +173,6 @@ def check_three_colors(robot: Robot, last_color):
         speed_l=-30,
         speed_r=-30,
         reflection_diff=22,
-        avoid_obstacles=False,
         left_reflection_function=lambda: robot.color_bl.rgb()[2],
         right_reflection_function=lambda: robot.color_br.rgb()[2],
     )
@@ -229,7 +224,6 @@ def go_to_origin_routine(robot: Robot):
     # Apontando pro vermelho
     robot.forward_while_same_reflection(
         reflection_diff=22,
-        avoid_obstacles=False,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
     )
@@ -240,7 +234,6 @@ def go_to_origin_routine(robot: Robot):
     robot.pid_turn(-90)
     robot.forward_while_same_reflection(
         reflection_diff=22,
-        avoid_obstacles=False,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
         fix_errors=True
