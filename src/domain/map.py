@@ -161,7 +161,7 @@ def set_path_routine(goal, start):
     i = 0
     for path in path_movements_list:
         if isinstance(path, tuple):
-            path_movements_list[i] = 30
+            path_movements_list[i] = 28
         i += 1
 
     path_movements_list.pop(0)
@@ -316,7 +316,7 @@ def path_to_movement(robot: Robot, goal, start=None):
             )
 
     if goal == ORIGIN_TUPLE:
-        # Apontando pro vermelho
+        # no quadrado da origem apontando as costas para a linha vermelha
         robot.forward_while_same_reflection(
             speed_l=-30,
             speed_r=-30,
@@ -331,7 +331,7 @@ def path_to_movement(robot: Robot, goal, start=None):
             sensor_function_r=lambda: robot.color_br.rgb()[2],
             direction_sign=-1,
         )
-        # chega na origem
+        # alinha no azul de ré
         robot.pid_walk(cm=3, speed=30)
         robot.pid_turn(-90)
         robot.forward_while_same_reflection(
@@ -348,8 +348,18 @@ def path_to_movement(robot: Robot, goal, start=None):
             sensor_function_r=lambda: robot.color_br.rgb()[2],
             direction_sign=-1,
         )
+        # alinha no vermelho de ré
         robot.pid_walk(cm=3, speed=30)
-        robot.pid_turn(-90)
+        robot.pid_turn(90)
+        robot.forward_while_same_reflection(
+            speed_l=-30,
+            speed_r=-30,
+            reflection_diff=22,
+            avoid_obstacles=False,
+            left_reflection_function=lambda: robot.color_bl.rgb()[2],
+            right_reflection_function=lambda: robot.color_br.rgb()[2],
+        )
+        robot.pid_walk(cm=2, speed=30)
         robot.pid_align(
             sensor_function_l=lambda: robot.color_bl.rgb()[2],
             sensor_function_r=lambda: robot.color_br.rgb()[2],
@@ -385,5 +395,5 @@ def decide_passenger_goal(passenger_info, park_flag):
 
     return goal, park_flag
 
-path_to_movement((4,8))
-path_to_movement(ORIGIN_TUPLE, start=(4,8))
+# path_to_movement((4,8))
+# path_to_movement(ORIGIN_TUPLE, start=(4,8))

@@ -168,5 +168,5 @@ def path_to_movement():
         elif (movement == "curva_esquerda"):
             robot.pid_turn(-90)
 
-path_to_movement()
+# path_to_movement()
 # set_path_routine((6,2))

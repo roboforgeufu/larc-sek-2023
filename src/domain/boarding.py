@@ -5,8 +5,7 @@ from pybricks.parameters import Stop
 
 
 def passenger_boarding(robot: Robot):
-    robot.line_grabber(vel=20, time=3000, sensor=robot.color_fr)
-    robot.pid_walk(speed=-30, cm=8)
+    robot.line_grabber(vel=20, time=3000, sensor=robot.color_fr, multiplier=2)
 
     robot.stop_mail_box.send(0)
     robot.infra_side_box.wait()
@@ -35,10 +34,15 @@ def passenger_boarding(robot: Robot):
     robot.pid_turn(90)
     robot.pid_walk(speed=-30, cm=1)
     robot.pid_align()
+
+    # comeca multiplas leituras
+    robot.stop_mail_box.send(0)
+
     robot.pid_walk(speed=30, cm=5)
 
-    # Parada 2
-    robot.stop_mail_box.send(0)
+    # termina multiplas leituras
+    robot.stop_mail_box.send(1)
+
 
     # Parada 3
     robot.mbox.wait()
@@ -87,7 +91,7 @@ def passenger_boarding(robot: Robot):
     robot.pid_walk(speed=-30, cm=1)
 
     robot.pid_align()
-    robot.pid_walk(speed=-30, cm=10)
+    robot.pid_walk(speed=-30, cm=7)
     robot.pid_turn(-90)
 
     # restaura a posicao inicial
@@ -115,16 +119,26 @@ def momo_passenger_boarding(robot: Robot):
     while robot.stop_mail_box.read() == 0:
         robot.infra_side_box.send(robot.infra_side.distance())
         wait(10)
+    
+
+    robot.stop_mail_box.wait_new()
+    # comeca multiplas leituras
+    distances = []
+    while robot.stop_mail_box.read() == 0:
+        distances.append(robot.ultra_front.distance())
+        wait(10)
+
+    # termina multiplas leituras
+
     # Parada 1
 
     # Parada 2
-    robot.stop_mail_box.wait_new()
     robot.motor_claw.run_until_stalled(-500, then=Stop.HOLD)
 
     # Parada 3
-    distance = robot.ultra_front.distance()
-    robot.ev3_print("DIST:", distance)
-    if distance > 60:
+    distances.append(robot.ultra_front.distance())
+    robot.ev3_print("DIST:", min(distances))
+    if min(distances) > 60:
         age = "CHILD"
     else:
         age = "ADULT"
