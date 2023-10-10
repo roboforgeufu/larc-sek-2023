@@ -43,6 +43,7 @@ def appa_main(appa: Robot):
 
     park_flag = 0
     while True:
+        #
         # Coleta de pessoas
         #
         passenger_info = passenger_boarding(appa)
@@ -68,7 +69,7 @@ def appa_main(appa: Robot):
         # Retorno a origem
         #
 
-        path_to_movement(appa, (8, 10), start=goal)
+        path_to_movement(appa, const.ORIGIN_TUPLE, start=goal)
         appa.stop_mail_box.send(1)
 
 
