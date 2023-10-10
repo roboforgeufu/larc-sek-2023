@@ -79,17 +79,17 @@ def momo_main(momo: Robot):
     # 
     # Chess Tower
     # 
-    while True:
-        momo.stop_mail_box.wait_new()
-        if momo.stop_mail_box.read() == 0:
-            break
+    # while True:
+    #     momo.stop_mail_box.wait_new()
+    #     if momo.stop_mail_box.read() == 0:
+    #         break
     
-    momo.obstacle_box.send(momo.ultra_front.distance())
-    while momo.stop_mail_box.read() == 0:
-        distance = momo.ultra_front.distance()
-        momo.obstacle_box.send(distance)
-        momo.ev3_print("obs:", distance)
-        wait(10)
+    # momo.obstacle_box.send(momo.ultra_front.distance())
+    # while momo.stop_mail_box.read() == 0:
+    #     distance = momo.ultra_front.distance()
+    #     momo.obstacle_box.send(distance)
+    #     momo.ev3_print("obs:", distance)
+    #     wait(10)
 
     #
     # Coleta de pessoas
@@ -240,7 +240,7 @@ def main():
                 color_bl=Port.S3,
                 color_br=Port.S4,
                 color_max_value=65,
-                turn_correction=1.05,
+                turn_correction=1.10,
                 debug=True,
                 is_server=True,
             )

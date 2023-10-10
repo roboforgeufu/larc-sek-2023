@@ -6,7 +6,7 @@ import constants as const
 
 def chess_tower(robot: Robot):
     i = 0
-    robot.stop_mail_box.send(0)
+    # robot.stop_mail_box.send(0)
     while True:
         has_seen_obstacle = robot.forward_while_same_reflection(
             reflection_diff=22,
@@ -80,7 +80,7 @@ def chess_tower(robot: Robot):
             robot.pid_turn(90)
             robot.pid_turn(90)
     
-    robot.stop_mail_box.send(1)
+    # robot.stop_mail_box.send(1)
 
 
 def calibra_pid_align(robot: Robot):

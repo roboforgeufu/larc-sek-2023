@@ -5,7 +5,10 @@ from pybricks.parameters import Stop
 
 
 def passenger_boarding(robot: Robot):
-    robot.line_grabber(vel=20, time=3000, sensor=robot.color_fr, multiplier=2)
+    robot.pid_turn(30)
+    robot.pid_walk(cm=2, speed=30)
+    robot.pid_line_grabber(PIDValues(target=50, kp=-3.5, ki=-0.05, kd=-10), vel=20, time=3000, sensor=robot.color_fr)
+    robot.pid_walk(cm=4, speed=-30)
 
     robot.stop_mail_box.send(0)
     robot.infra_side_box.wait()
@@ -70,7 +73,6 @@ def passenger_boarding(robot: Robot):
     # alinha no azul
     robot.forward_while_same_reflection(
         reflection_diff=22,
-        avoid_obstacles=False,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
         fix_errors=False
@@ -83,7 +85,6 @@ def passenger_boarding(robot: Robot):
     # vai até a origem
     robot.forward_while_same_reflection(
         reflection_diff=22,
-        avoid_obstacles=False,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
         fix_errors=False,
@@ -97,7 +98,6 @@ def passenger_boarding(robot: Robot):
     # restaura a posicao inicial
     robot.forward_while_same_reflection(
         reflection_diff=22,
-        avoid_obstacles=False,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
         fix_errors=False

@@ -293,7 +293,6 @@ def path_to_movement(robot: Robot, goal, start=None):
         elif movement == "alinha_atras":
             robot.forward_while_same_reflection(
                 reflection_diff=22,
-                avoid_obstacles=False,
                 left_reflection_function=lambda: robot.color_fl.rgb()[2],
                 right_reflection_function=lambda: robot.color_fr.rgb()[2],
             )
@@ -304,7 +303,6 @@ def path_to_movement(robot: Robot, goal, start=None):
                 speed_l=-30,
                 speed_r=-30,
                 reflection_diff=22,
-                avoid_obstacles=False,
                 left_reflection_function=lambda: robot.color_bl.rgb()[2],
                 right_reflection_function=lambda: robot.color_br.rgb()[2],
             )
@@ -321,7 +319,6 @@ def path_to_movement(robot: Robot, goal, start=None):
             speed_l=-30,
             speed_r=-30,
             reflection_diff=22,
-            avoid_obstacles=False,
             left_reflection_function=lambda: robot.color_bl.rgb()[2],
             right_reflection_function=lambda: robot.color_br.rgb()[2],
         )
@@ -338,7 +335,6 @@ def path_to_movement(robot: Robot, goal, start=None):
             speed_l=-30,
             speed_r=-30,
             reflection_diff=22,
-            avoid_obstacles=False,
             left_reflection_function=lambda: robot.color_bl.rgb()[2],
             right_reflection_function=lambda: robot.color_br.rgb()[2],
         )
@@ -355,7 +351,6 @@ def path_to_movement(robot: Robot, goal, start=None):
             speed_l=-30,
             speed_r=-30,
             reflection_diff=22,
-            avoid_obstacles=False,
             left_reflection_function=lambda: robot.color_bl.rgb()[2],
             right_reflection_function=lambda: robot.color_br.rgb()[2],
         )

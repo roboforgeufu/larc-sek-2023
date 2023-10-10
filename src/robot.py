@@ -805,15 +805,15 @@ class Robot:
 
     def pid_line_grabber(  # pylint: disable=invalid-name
         self,
-        vel,
-        time,
-        sensor: ColorSensor,
         pid: PIDValues = PIDValues(
             target=35,  # medir na linha toda vez
             kp=3.5,
             ki=0.05,
             kd=10,
         ),
+        vel = 20,
+        time = 3000,
+        sensor: ColorSensor = None,
     ):
         """
         O robô usa um dos sensores de cor para encontrar a linha e entrar em posição
