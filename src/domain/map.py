@@ -276,7 +276,7 @@ def find_turns(path_list):
     return path_list
 
 
-def path_to_movement(goal, start=None):
+def path_to_movement(robot, goal, start=None):
     # as direcoes sao invertidas pois o robo anda de ré
     if start is None:
         start = ORIGIN_TUPLE
@@ -291,7 +291,7 @@ def path_to_movement(goal, start=None):
         #
         # IMPLEMENTAR CHECAGEM DE OBSTACULOS
         #
-        
+
         # appa.stop_mail_box.send(0)
 
         # PEGAR DO MOOMO A DISTANCIA LIDA PELO SENSOR DE TRÁS PARA DETECTAR OBSTACULO

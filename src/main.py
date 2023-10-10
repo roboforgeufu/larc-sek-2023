@@ -118,108 +118,15 @@ def momo_main(momo: Robot):
 
 
 def test_appa_main(appa: Robot):
-    appa.stop_mail_box.wait()
-    deliver_person_ahead(appa)
-    return True
-    # appa.pid_line_follower(
-    #     vel=100,
-    #     pid=PIDValues(
-    #         target=35,
-    #         kp=1,
-    #         ki=0.05,
-    #         kd=10,
-    #     ),
-    #     loop_condition=lambda: (appa.color_fl.rgb()[2] > 50),
-    #chess_tower(appa)
-    #path_to_movement(appa,(8,10),start=(6,2))
-
-    # alinha no azul
-
-    #
-    # Retorno para a origem
-    #
-
-    # alinha no azul
-    # appa.forward_while_same_reflection(
-    #     reflection_diff=22,
-    #     avoid_obstacles=False,
-    #     left_reflection_function=lambda: appa.color_fl.rgb()[2],
-    #     right_reflection_function=lambda: appa.color_fr.rgb()[2],
-    # )
-    # appa.simple_walk(speed=30, cm=-2)
-    # appa.pid_align(
-    #     PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-    #     sensor_function_l=lambda: appa.color_fl.rgb()[2],
-    #     sensor_function_r=lambda: appa.color_fr.rgb()[2],
-    # )
-    # appa.simple_walk(speed=30, cm=-10)
-    # appa.pid_turn(90)
-
-    # # vai até a origem
-    # appa.forward_while_same_reflection(
-    #     reflection_diff=22,
-    #     avoid_obstacles=False,
-    #     left_reflection_function=lambda: appa.color_fl.rgb()[2],
-    #     right_reflection_function=lambda: appa.color_fr.rgb()[2],
-    # )
-    # appa.simple_walk(speed=30, cm=-10)
-    # appa.pid_turn(90)
-
-    # # restaura a posicao inicial
-    # appa.forward_while_same_reflection(
-    #     reflection_diff=22,
-    #     avoid_obstacles=False,
-    #     left_reflection_function=lambda: appa.color_fl.rgb()[2],
-    #     right_reflection_function=lambda: appa.color_fr.rgb()[2],
-    # )
-    # appa.pid_align(
-    #     PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-    #     sensor_function_l=lambda: appa.color_fl.rgb()[2],
-    #     sensor_function_r=lambda: appa.color_fr.rgb()[2],
-    # )
-    # appa.simple_walk(speed=30, cm=-10)
-    # appa.pid_turn(-90)
-    # appa.forward_while_same_reflection(
-    #     reflection_diff=22,
-    #     avoid_obstacles=False,
-    #     left_reflection_function=lambda: appa.color_fl.rgb()[2],
-    #     right_reflection_function=lambda: appa.color_fr.rgb()[2],
-    # )
-    # appa.pid_align(
-    #     PIDValues(target=50, kp=0.6, ki=0.005, kd=0.2),
-    #     sensor_function_l=lambda: appa.color_fl.rgb()[2],
-    #     sensor_function_r=lambda: appa.color_fr.rgb()[2],
-    # )
-    # appa.simple_walk(speed=30, cm=-10)
-
-    park_flag = 0
-    passenger_info = "ADULT Color.RED"
-    passenger_info = passenger_info.split()
-    if passenger_info[0] == "CHILD":
-        if passenger_info[1] == "Color.BLUE":
-            goal = (0, 8)  # escola
-        elif passenger_info[1] == "Color.BROWN":
-            goal = (8, 8)  # biblioteca
-        elif passenger_info[1] == "Color.GREEN":
-            if park_flag == 0:  # parque
-                goal = (8, 0)
-            elif park_flag == 1:
-                goal = (4, 0)
-            elif park_flag == 2:
-                goal = (0, 0)
-            park_flag += 1
-
-    if passenger_info[0] == "ADULT":
-        if passenger_info[1] == "Color.BLUE":
-            goal = (8, 4)  # museu 
-        elif passenger_info[1] == "Color.BROWN":
-            goal = (0, 4)  # padaria
-        elif passenger_info[1] == "Color.GREEN":
-            goal = (4, 8)  # prefeitura
-        elif passenger_info[1] == "Color.RED":
-            goal = (4, 4)  # farmacia
-
-    path_to_movement(appa, goal)
+    
+    appa.pid_turn(
+    156,
+    pid=PIDValues(
+        kp=3.5,
+        ki=0.02,
+        kd=10
+    ),
+    )
 
 
 def test_momo_main(momo: Robot):
