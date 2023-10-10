@@ -10,7 +10,7 @@ def chess_tower(robot: Robot):
     while True:
         has_seen_obstacle = robot.forward_while_same_reflection(
             reflection_diff=22,
-            obstacle_function=lambda: robot.obstacle_box.read() < const.OBSTACLE_DIST,
+            # obstacle_function=lambda: robot.obstacle_box.read() < const.OBSTACLE_DIST,
             left_reflection_function=lambda: robot.color_fl.rgb()[2],
             right_reflection_function=lambda: robot.color_fr.rgb()[2],
         )
