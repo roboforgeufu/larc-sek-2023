@@ -75,6 +75,21 @@ def appa_main(appa: Robot):
 def momo_main(momo: Robot):
     momo.motor_claw.run_until_stalled(500)
 
+    # 
+    # Chess Tower
+    # 
+    while True:
+        momo.stop_mail_box.wait_new()
+        if momo.stop_mail_box.read() == 0:
+            break
+    
+    momo.obstacle_box.send(momo.ultra_front.distance())
+    while momo.stop_mail_box.read() == 0:
+        distance = momo.ultra_front.distance()
+        momo.obstacle_box.send(distance)
+        momo.ev3_print("obs:", distance)
+        wait(10)
+
     #
     # Coleta de pessoas
     #
