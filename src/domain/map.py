@@ -349,7 +349,7 @@ def path_to_movement(robot: Robot, goal, start=None):
             direction_sign=-1,
         )
         # alinha no vermelho de ré
-        #robot.pid_walk(cm=3, speed=30)
+        # robot.pid_walk(cm=3, speed=30)
         robot.pid_turn(90)
         robot.forward_while_same_reflection(
             speed_l=-30,
