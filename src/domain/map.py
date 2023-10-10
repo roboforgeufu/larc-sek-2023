@@ -4,6 +4,7 @@ from constants import ORIGIN_TUPLE
 from robot import Robot
 from utils import PIDValues
 from domain.chess_tower import go_to_origin_routine
+from copy import copy
 
 # 12 de largura, 9 de altura
 city_map = [
@@ -79,6 +80,7 @@ def a_star(start: tuple[int, int], goal, heuristic):
 
 def set_path_routine(goal, start):
     path_positions_list = a_star(start, goal, euclidian_distance)
+    original_positions_list = copy(path_positions_list)
     zero_size_elements = [
         (0, 1),
         (0, 3),
@@ -203,7 +205,7 @@ def set_path_routine(goal, start):
         path_movements_list.insert(i, "alinha_frente")
         path_movements_list.insert(i+1, (-5))
 
-    return path_movements_list
+    return path_movements_list, original_positions_list
 
 
 def ghost_busters(ghosts, busters):
@@ -274,18 +276,38 @@ def find_turns(path_list):
     return path_list
 
 
-def path_to_movement(robot: Robot, goal, start=None):
+def path_to_movement(goal, start=None):
     # as direcoes sao invertidas pois o robo anda de ré
     if start is None:
         start = ORIGIN_TUPLE
-    movement_list = set_path_routine(goal, start)
-    print(movement_list)
+    movement_list, position_list = set_path_routine(goal, start)
+    # print(movement_list)
+    # print(position_list)
+    i = 0
     for movement in movement_list:
-        if isinstance(movement, int) and movement != 0:
+        current_position = position_list[i]
+        # print(movement, i, current_position)
+
+        #
+        # IMPLEMENTAR CHECAGEM DE OBSTACULOS
+        #
+        
+        # appa.stop_mail_box.send(0)
+
+        # PEGAR DO MOOMO A DISTANCIA LIDA PELO SENSOR DE TRÁS PARA DETECTAR OBSTACULO
+        # has_seen_obstacle = True
+        # if has_seen_obstacle:
+        #     get_closer_to_obstacle_routine(robot)
+        
+        # appa.stop_mail_box.send(1)
+
+        if isinstance(movement, int):
             if movement > 0:
                 robot.pid_walk(cm=movement, speed=-80)
-            else:
+            elif movement < 0:
                 robot.pid_walk(cm=movement, speed=80)
+            if abs(movement) == 28 or movement == 0:
+                i += 1
         elif movement == "curva_direita":
             robot.pid_turn(90)
         elif movement == "curva_esquerda":
@@ -396,4 +418,3 @@ def decide_passenger_goal(passenger_info, park_flag):
     return goal, park_flag
 
 # path_to_movement((4,8))
-# path_to_movement(ORIGIN_TUPLE, start=(4,8))
