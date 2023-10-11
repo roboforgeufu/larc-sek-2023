@@ -1,10 +1,12 @@
 from math import sqrt
 
-from constants import ORIGIN_TUPLE
+from constants import ORIGIN_TUPLE, SQUARE_SIZE
 from robot import Robot
 from utils import PIDValues
 from domain.chess_tower import go_to_origin_routine
 from copy import copy
+# ORIGIN_TUPLE = (8,10)
+# SQUARE_SIZE = 28
 
 # 12 de largura, 9 de altura
 city_map = [
@@ -163,12 +165,23 @@ def set_path_routine(goal, start):
     i = 0
     for path in path_movements_list:
         if isinstance(path, tuple):
-            path_movements_list[i] = 28
+            path_movements_list[i] = SQUARE_SIZE
         i += 1
 
     path_movements_list.pop(0)
 
     if start == ORIGIN_TUPLE:
+        if path_movements_list[0] == 0 and path_movements_list[1] == SQUARE_SIZE:
+            path_movements_list.clear()
+            brown_child_delivery = [
+                "curva_esquerda",
+                "alinha_frente",
+                -5,
+            ]
+            for movement in brown_child_delivery:
+                path_movements_list.append(movement)
+            return path_movements_list, original_positions_list
+
         first_left_turn_index = path_movements_list.index("curva_esquerda")
         path_movements_list.insert((first_left_turn_index + 1), "alinha_frente")
         i = 0
@@ -192,8 +205,18 @@ def set_path_routine(goal, start):
         ]
         for movement in alignment_routine:
             path_movements_list.append(movement)
-      
+
     if goal == ORIGIN_TUPLE:
+        if path_movements_list[0] == 0 and path_movements_list[1] == SQUARE_SIZE:
+            path_movements_list.clear()
+            brown_child_return = [
+                "alinha_atras",
+                -5,
+                "curva_direita"
+            ]
+            for movement in brown_child_return:
+                path_movements_list.append(movement)
+            return path_movements_list, original_positions_list
         path_movements_list = path_movements_list[2:]
         i = (len(path_movements_list)-1)
         while True:
@@ -279,8 +302,8 @@ def path_to_movement(robot, goal, start=None):
     if start is None:
         start = ORIGIN_TUPLE
     movement_list, position_list = set_path_routine(goal, start)
-    # print(movement_list)
-    # print(position_list)
+    print(movement_list)
+    print(position_list)
     i = 0
     for movement in movement_list:
         current_position = position_list[i]
@@ -304,7 +327,7 @@ def path_to_movement(robot, goal, start=None):
                 robot.pid_walk(cm=movement, speed=-80, fix_errors=True)
             else:
                 robot.pid_walk(cm=movement, speed=80, fix_errors=True)
-            if abs(movement) == 28 or movement == 0:
+            if abs(movement) == SQUARE_SIZE or movement == 0:
                 i += 1
 
         elif movement == "curva_direita":
@@ -424,4 +447,4 @@ def decide_passenger_goal(passenger_info, park_flag):
 
     return goal, park_flag
 
-# path_to_movement((4,8))
+# path_to_movement((8,10), start=(8,8))
