@@ -74,7 +74,7 @@ def appa_main(appa: Robot):
 
 
 def momo_main(momo: Robot):
-    momo.motor_claw.run_until_stalled(500, duty_limit=50)
+    momo.motor_claw.run_until_stalled(500, duty_limit=const.CLAW_DUTY_LIMIT)
 
     # 
     # Chess Tower
@@ -110,7 +110,7 @@ def momo_main(momo: Robot):
         # Desembarque pessoas
         #
         momo.stop_mail_box.wait()
-        momo.motor_claw.run_until_stalled(500, duty_limit=50)
+        momo.motor_claw.run_until_stalled(500, duty_limit=const.CLAW_DUTY_LIMIT)
 
         #
         # Retorno a origem

@@ -78,7 +78,7 @@ def chess_tower(robot: Robot):
             robot.pid_turn(90)
         else:
             robot.pid_turn(
-                170,
+                180,
                 # pid=PIDValues(
                 #     kp=2.5,
                 #     ki=0.01,

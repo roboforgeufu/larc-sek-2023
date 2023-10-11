@@ -2,7 +2,7 @@ from robot import Robot
 from utils import PIDValues
 from pybricks.tools import wait
 from pybricks.parameters import Stop
-
+import constants as const
 
 def passenger_boarding(robot: Robot):
     robot.pid_turn(30)
@@ -110,7 +110,7 @@ def momo_passenger_boarding(robot: Robot):
     # Parada 1
 
     # Parada 2
-    robot.motor_claw.run_until_stalled(-500, then=Stop.HOLD, duty_limit=50)
+    robot.motor_claw.run_until_stalled(-500, then=Stop.HOLD, duty_limit=const.CLAW_DUTY_LIMIT)
 
     # Parada 3
     distances.append(robot.ultra_front.distance())

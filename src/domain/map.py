@@ -315,7 +315,7 @@ def path_to_movement(robot, goal, start=None):
 
         elif movement == "mega_curva_direita":
             robot.pid_turn(
-                170,
+                180,
                 # pid=PIDValues(
                 #     kp=2.5,
                 #     ki=0.01,
