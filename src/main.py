@@ -118,16 +118,16 @@ def momo_main(momo: Robot):
 
 
 def test_appa_main(appa: Robot):
-    while True:
-        # appa.pid_turn(90)
-        # wait_button_pressed(appa.brick)
-        # appa.pid_turn(-90)
-        appa.pid_align()
-        appa.brick.speaker.beep()
-        wait_button_pressed(appa.brick)
-        appa.pid_align(direction_sign=-1, sensor_function_l=appa.color_bl.rgb()[2], sensor_function_r=appa.color_br.rgb()[2])
-        appa.brick.speaker.beep()
-        wait_button_pressed(appa.brick)
+    
+    appa.pid_turn(
+    156,
+    pid=PIDValues(
+        kp=3.5,
+        ki=0.02,
+        kd=10
+    ),
+    )
+
 
 def test_momo_main(momo: Robot):
     pass
