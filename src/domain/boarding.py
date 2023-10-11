@@ -29,6 +29,14 @@ def passenger_boarding(robot: Robot):
     # Parada 1
     robot.pid_walk(speed=30, cm=1.5)
     robot.pid_turn(90)
+    robot.pid_walk(speed=-30, cm=3)
+
+    robot.forward_while_same_reflection(
+        reflection_diff=22,
+        left_reflection_function=lambda: robot.color_fl.rgb()[2],
+        right_reflection_function=lambda: robot.color_fr.rgb()[2],
+        fix_errors=False
+    )
     robot.pid_walk(speed=-30, cm=1)
     robot.pid_align()
 

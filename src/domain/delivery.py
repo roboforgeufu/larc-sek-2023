@@ -49,3 +49,19 @@ def deliver_person_ahead(robot: Robot):
     robot.stop_mail_box.send(0)
     wait(2000)
     robot.pid_walk(cm=10, speed=-50)
+
+    robot.forward_while_same_reflection(
+        speed_l=-50,
+        speed_r=-50,
+        reflection_diff=22,
+        left_reflection_function=lambda: robot.color_bl.rgb()[2],
+        right_reflection_function=lambda: robot.color_br.rgb()[2],
+        fix_errors=False,
+    )
+    robot.pid_walk(speed=30, cm=1)
+    robot.pid_align(
+        sensor_function_l=lambda: robot.color_bl.rgb()[2],
+        sensor_function_r=lambda: robot.color_br.rgb()[2],
+        direction_sign=-1
+    )
+

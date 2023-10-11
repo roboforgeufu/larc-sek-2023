@@ -259,9 +259,9 @@ def go_to_origin_routine(robot: Robot):
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
         fix_errors=True
     )
-    robot.pid_walk(cm=2, speed=-30)
+    robot.pid_walk(cm=3, speed=-30)
     robot.pid_align()
-    robot.pid_walk(cm=2, speed=-30)
+    robot.pid_walk(cm=3, speed=-30)
     robot.pid_turn(-90)
     robot.pid_align(
         sensor_function_l=lambda: robot.color_bl.rgb()[2],
