@@ -171,7 +171,7 @@ def set_path_routine(goal, start):
     path_movements_list.pop(0)
 
     if start == ORIGIN_TUPLE:
-        if path_movements_list[0] == 0 and path_movements_list[1] == SQUARE_SIZE:
+        if path_movements_list[0] == 0 and path_movements_list[1] == SQUARE_SIZE and len(path_movements_list) == 2:
             path_movements_list.clear()
             brown_child_delivery = [
                 "curva_esquerda",
@@ -207,10 +207,9 @@ def set_path_routine(goal, start):
             path_movements_list.append(movement)
 
     if goal == ORIGIN_TUPLE:
-        if path_movements_list[0] == 0 and path_movements_list[1] == SQUARE_SIZE:
+        if path_movements_list[0] == 0 and path_movements_list[1] == SQUARE_SIZE and len(path_movements_list) == 2:
             path_movements_list.clear()
             brown_child_return = [
-                "alinha_atras",
                 -5,
                 "curva_direita"
             ]
