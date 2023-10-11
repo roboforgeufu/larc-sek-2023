@@ -78,12 +78,12 @@ def chess_tower(robot: Robot):
             robot.pid_turn(90)
         else:
             robot.pid_turn(
-                156,
-                pid=PIDValues(
-                    kp=3.5,
-                    ki=0.01,
-                    kd=10
-                ),
+                170,
+                # pid=PIDValues(
+                #     kp=2.5,
+                #     ki=0.01,
+                #     kd=6
+                # ),
                 )
     
     # robot.stop_mail_box.send(1)
