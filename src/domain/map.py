@@ -5,6 +5,8 @@ from robot import Robot
 from utils import PIDValues
 from domain.chess_tower import go_to_origin_routine
 from copy import copy
+from pybricks.tools import wait
+from pybricks.parameters import Color
 
 # 12 de largura, 9 de altura
 city_map = [
@@ -425,3 +427,32 @@ def decide_passenger_goal(passenger_info, park_flag):
     return goal, park_flag
 
 # path_to_movement((4,8))
+
+def momo_obstacle_transmission(robot):
+    robot.brick.speaker.beep()
+    robot.brick.light.on(Color.ORANGE)
+
+    while True:
+        robot.stop_mail_box.wait()
+        if robot.stop_mail_box.read() == 0:
+            break
+    
+    robot.ev3_print("TRANSMISSION")
+    
+    robot.front_obstacle_box.send(robot.ultra_front.distance())
+    robot.back_obstacle_box.send(robot.ultra_back.distance())
+    while robot.stop_mail_box.read() == 0:
+        distance_f = robot.ultra_front.distance()
+        distance_b = robot.ultra_back.distance()
+        robot.front_obstacle_box.send(distance_f)
+        wait(10)
+        robot.back_obstacle_box.send(distance_b)
+        wait(10)
+        robot.ev3_print("obs:", distance_f, distance_b)
+        wait(10)
+    robot.brick.speaker.beep(800)
+    robot.brick.light.on(Color.GREEN)
+
+
+
+        

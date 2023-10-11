@@ -90,7 +90,7 @@ class Robot:
         if infra_side is not None:
             self.infra_side = InfraredSensor(infra_side)
         if ultra_back is not None:
-            self.ultra_brack = UltrasonicSensor(ultra_back)
+            self.ultra_back = UltrasonicSensor(ultra_back)
 
         # Sensores ultrassonicos
         if ultra_front is not None:
@@ -117,7 +117,8 @@ class Robot:
             # mailboxes
             self.mbox = TextMailbox("text", self.server)
             self.infra_side_box = NumericMailbox("ultra", self.server)
-            self.obstacle_box = NumericMailbox("obstacle", self.server)
+            self.front_obstacle_box = NumericMailbox("f_obstacle", self.server)
+            self.back_obstacle_box = NumericMailbox("b_obstacle", self.server)
             self.color_front_box = NumericMailbox("color", self.server)
             self.stop_mail_box = NumericMailbox("stop", self.server)
 
@@ -137,7 +138,8 @@ class Robot:
             # mailboxes
             self.mbox = TextMailbox("text", self.client)
             self.infra_side_box = NumericMailbox("ultra", self.client)
-            self.obstacle_box = NumericMailbox("obstacle", self.client)
+            self.front_obstacle_box = NumericMailbox("f_obstacle", self.client)
+            self.back_obstacle_box = NumericMailbox("b_obstacle", self.client)
             self.color_front_box = NumericMailbox("color", self.client)
             self.stop_mail_box = NumericMailbox("stop", self.client)
 

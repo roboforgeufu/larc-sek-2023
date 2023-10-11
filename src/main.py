@@ -29,12 +29,14 @@ import constants as const
 from domain.boarding import passenger_boarding, momo_passenger_boarding
 from domain.chess_tower import chess_tower
 from domain.delivery import deliver_person_ahead
-from domain.map import decide_passenger_goal, path_to_movement
+from domain.map import decide_passenger_goal, path_to_movement, momo_obstacle_transmission
 from robot import Robot
 from utils import PIDValues, ev3_print, get_hostname, wait_button_pressed
 
 
 def appa_main(appa: Robot):
+    appa.stop_mail_box.wait()
+    wait_button_pressed(appa.brick)
     #
     # Localizacao inicial
     #
@@ -75,22 +77,13 @@ def appa_main(appa: Robot):
 
 def momo_main(momo: Robot):
     momo.motor_claw.run_until_stalled(500, duty_limit=const.CLAW_DUTY_LIMIT)
+    momo.stop_mail_box.send(0)
 
     # 
     # Chess Tower
     # 
-    # while True:
-    #     momo.stop_mail_box.wait_new()
-    #     if momo.stop_mail_box.read() == 0:
-    #         break
+    momo_obstacle_transmission(momo)
     
-    # momo.obstacle_box.send(momo.ultra_front.distance())
-    # while momo.stop_mail_box.read() == 0:
-    #     distance = momo.ultra_front.distance()
-    #     momo.obstacle_box.send(distance)
-    #     momo.ev3_print("obs:", distance)
-    #     wait(10)
-
     #
     # Coleta de pessoas
     #
@@ -105,6 +98,7 @@ def momo_main(momo: Robot):
         #
         # Pathfinding e movimentacao
         #
+        momo_obstacle_transmission(momo)
 
         #
         # Desembarque pessoas
@@ -115,6 +109,7 @@ def momo_main(momo: Robot):
         #
         # Retorno a origem
         #
+        momo_obstacle_transmission(momo)
 
 
 def test_appa_main(appa: Robot):

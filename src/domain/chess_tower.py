@@ -6,18 +6,22 @@ import constants as const
 
 def chess_tower(robot: Robot):
     i = 0
-    # robot.stop_mail_box.send(0)
+    robot.stop_mail_box.send(0)
+    direction_sign = 1
     while True:
         has_seen_obstacle = robot.forward_while_same_reflection(
             reflection_diff=22,
-            # obstacle_function=lambda: robot.obstacle_box.read() < const.OBSTACLE_DIST,
+            obstacle_function=lambda: (robot.front_obstacle_box.read() or 2550) < const.OBSTACLE_DIST,
             left_reflection_function=lambda: robot.color_fl.rgb()[2],
             right_reflection_function=lambda: robot.color_fr.rgb()[2],
         )
+        robot.brick.speaker.beep()
         robot.ev3_print("Saiu do loop:", has_seen_obstacle)
 
+        has_seen_obstacle_inside_routines = False
+
         if has_seen_obstacle:
-            get_closer_to_obstacle_routine(robot)
+            last_color = get_closer_to_obstacle_routine(robot, direction_sign)
         else:
             robot.pid_walk(cm=2, speed=-30)
             robot.pid_align()
@@ -36,10 +40,8 @@ def chess_tower(robot: Robot):
 
             robot.ev3_print(last_color)
 
-        if last_color == Color.BLACK or last_color == Color.YELLOW:
-            robot.pid_walk(cm=10, speed=-50)
 
-        elif last_color == Color.BLUE or last_color == Color.RED:
+        if last_color == Color.BLUE or last_color == Color.RED:
             if last_color == Color.BLUE:
                 # Azul de frente
                 robot.pid_walk(cm=10, speed=-80)
@@ -60,17 +62,28 @@ def chess_tower(robot: Robot):
                     and three_colors_r[2] == Color.YELLOW
                 ):
                     # Se é o case A onde vemos VERMELHO, AMARELO, AMARELO (posicao A)
-                    case_a_routine(robot)
+                    has_seen_obstacle_inside_routines = case_a_routine(robot)
+                    if has_seen_obstacle_inside_routines:
+                        direction_sign = 1
+                        
+
                 elif (three_colors_l[1] == Color.BLACK) and (
                     (three_colors_r[2] == Color.YELLOW)
                     or (three_colors_l[2] == Color.YELLOW)
                 ):
                     # Case B caso veja VERMELHO, PRETO, AMARELO.
-                    triple_case_routine(robot)
+                    has_seen_obstacle_inside_routines, direction_sign = triple_case_routine(robot)
 
-            # normaliza a posicao na origem
-            go_to_origin_routine(robot)
-            break
+
+            if has_seen_obstacle_inside_routines:
+                get_closer_to_obstacle_routine(robot, direction_sign)
+            else:
+                # normaliza a posicao na origem
+                go_to_origin_routine(robot)
+                break
+        else:
+            # yellow or black
+            robot.pid_walk(cm=10, speed=-50)
 
         i += 1
         # print(i)
@@ -86,7 +99,7 @@ def chess_tower(robot: Robot):
                 # ),
                 )
     
-    # robot.stop_mail_box.send(1)
+    robot.stop_mail_box.send(1)
 
 
 def calibra_pid_align(robot: Robot):
@@ -115,16 +128,20 @@ def case_a_routine(robot: Robot):
         direction_sign=-1
     )
     
-    robot.forward_while_same_reflection(
+    has_seen_obstacle = robot.forward_while_same_reflection(
         reflection_diff=22,
+        obstacle_function=lambda: (robot.front_obstacle_box.read() or 2550) < const.OBSTACLE_DIST,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
     )
+    if has_seen_obstacle:
+        return has_seen_obstacle
     robot.pid_align()
     # Azul de frente
     robot.pid_walk(cm=10, speed=-80)
     robot.pid_turn(90)
     # Para apontado pra origem
+    return False
 
 
 def triple_case_routine(robot: Robot):
@@ -132,24 +149,33 @@ def triple_case_routine(robot: Robot):
     robot.pid_walk(cm=30, speed=80)
     robot.pid_turn(90)
     # posicao H e C chegam no azul
-    robot.forward_while_same_reflection(
+    has_seen_obstacle = robot.forward_while_same_reflection(
         reflection_diff=22,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
+        obstacle_function=lambda: (robot.front_obstacle_box.read() or 2550) < const.OBSTACLE_DIST,
     )
+    if has_seen_obstacle:
+        return has_seen_obstacle, 1
+    robot.pid_walk(cm=1, speed=-30)
     robot.pid_align()
-    robot.pid_walk(cm=1, speed=30)
+    
     # posicao F chega no preto
     if (robot.color_fl.color() == Color.BLACK) or (
         robot.color_fr.color() == Color.BLACK
     ):
-        robot.forward_while_same_reflection(
+        has_seen_obstacle = robot.forward_while_same_reflection(
             speed_l=-30,
             speed_r=-30,
             reflection_diff=22,
             left_reflection_function=lambda: robot.color_bl.rgb()[2],
             right_reflection_function=lambda: robot.color_br.rgb()[2],
+            obstacle_function=lambda: (robot.back_obstacle_box.read() or 2550) < const.OBSTACLE_DIST,
         )
+        if has_seen_obstacle:
+            return has_seen_obstacle, -1
+        
+        robot.pid_walk(cm=1, speed=30)
         robot.pid_align(
             sensor_function_l=lambda: robot.color_bl.rgb()[2],
             sensor_function_r=lambda: robot.color_br.rgb()[2],
@@ -160,10 +186,11 @@ def triple_case_routine(robot: Robot):
         robot.pid_turn(-90)
 
     else:
-        robot.pid_align()
         # Azul de frente
         robot.pid_walk(cm=10, speed=-80)
         robot.pid_turn(90)
+    
+    return has_seen_obstacle, 1
 
 
 def check_three_colors(robot: Robot, last_color):
@@ -225,20 +252,52 @@ def check_three_colors(robot: Robot, last_color):
     return three_colors_l, three_colors_r
 
 
-def get_closer_to_obstacle_routine(robot: Robot):
+def get_closer_to_obstacle_routine(robot: Robot, direction_sign):
+
+    if direction_sign > 0:
+        motor_right = robot.motor_r
+        motor_left = robot.motor_l
+        obstacle_box = robot.front_obstacle_box
+
+        sensor_right = robot.color_fr
+        sensor_left = robot.color_fl
+    else:
+        # ré
+        motor_right = robot.motor_l
+        motor_left = robot.motor_r
+        obstacle_box = robot.back_obstacle_box
+
+        sensor_right = robot.color_bl
+        sensor_left = robot.color_br
+
+
     # Aproxima do obstáculo e lê a cor do chão
-    elapsed_time, i_share, error = 0,0,0
-    while robot.ultra_front.distance() > 70:
-        robot.ev3_print(robot.ultra_front.distance())
+    elapsed_time = 0
+    i_share = 0
+    error = 0
+    motor_right.reset_angle(0)
+    motor_left.reset_angle(0)
+    robot.stopwatch.reset()
+
+    initial_right_read = sensor_right.rgb()[2]
+    initial_left_read = sensor_left.rgb()[2]
+
+    while (obstacle_box.read() or 2550) > 70:
+        robot.ev3_print(obstacle_box.read())
         elapsed_time, i_share, error = robot.loopless_pid_walk(
-            elapsed_time,
-            i_share,
-            error,
+            elapsed_time, i_share, error, vel=30*direction_sign
         )
-    robot.pid_walk(cm=4.0, speed=30)
+
+        if abs(sensor_right.rgb()[2] - initial_right_read) > 22 or abs(sensor_left.rgb()[2] - initial_left_read) > 22:
+            break
+
+    robot.pid_walk(cm=2.0, speed=30 * direction_sign)
     last_color = robot.color_fl.color()
     robot.ev3_print(last_color)
-    robot.pid_walk(cm=21, speed=-60, fix_errors=True)
+    robot.pid_walk(cm=18, speed=-50 * direction_sign)
+
+    robot.brick.speaker.beep()
+    return last_color
 
 
 def go_to_origin_routine(robot: Robot):
