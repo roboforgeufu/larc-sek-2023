@@ -283,9 +283,9 @@ def path_to_movement(robot: Robot, goal, start=None):
     for movement in movement_list:
         if isinstance(movement, int) and movement != 0:
             if movement > 0:
-                robot.pid_walk(cm=movement, speed=-80)
+                robot.pid_walk(cm=movement, speed=-80, fix_errors=True)
             else:
-                robot.pid_walk(cm=movement, speed=80)
+                robot.pid_walk(cm=movement, speed=80, fix_errors=True)
         elif movement == "curva_direita":
             robot.pid_turn(90)
         elif movement == "curva_esquerda":
