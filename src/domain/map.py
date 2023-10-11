@@ -201,7 +201,7 @@ def set_path_routine(goal, start):
         alignment_routine = [
             "alinha_frente",
             -5,
-            "mega_curva_direita",
+            "mega_curva_sem_obs",
             "alinha_frente",
             -5,
         ]
@@ -298,6 +298,59 @@ def find_turns(path_list):
     return path_list, original_find_turn_list
 
 
+
+def recalculate_path(robot, current_position, current_orientation, goal, position_list):
+    has_seen_obstacle = False
+    movement_list = []
+    if robot.back_obstacle_box.read() < OBSTACLE_DIST*3:
+        has_seen_obstacle = True
+    if has_seen_obstacle:
+        i = 0
+        add = (position_list[i+1][0] - position_list[i][0], position_list[i+1][1] - position_list[i][1])
+        city_map_line_list = list(city_map[current_position[0]+add[0]])
+        city_map_line_list[current_position[1]+add[1]] = "X"
+        city_map[current_position[0]] = "".join(city_map_line_list)
+
+        movement_list, position_list, turn_list = set_path_routine(goal, current_position)
+        if current_orientation == "N":
+            if turn_list[0] == "S":
+                movement_list.insert(0, "mega_curva_direita")
+            if turn_list[0] == "L":
+                movement_list.insert(0, "curva_direita")
+            if turn_list[0] == "O":
+                movement_list.insert(0, "curva_esquerda")
+
+        if current_orientation == "S":
+            if turn_list[0] == "N":
+                movement_list.insert(0, "mega_curva_direita")
+            if turn_list[0] == "O":
+                movement_list.insert(0, "curva_direita")
+            if turn_list[0] == "L":
+                movement_list.insert(0, "curva_esquerda")
+
+        if current_orientation == "L":
+            if turn_list[0] == "O":
+                movement_list.insert(0, "mega_curva_direita")
+            if turn_list[0] == "S":
+                movement_list.insert(0, "curva_direita")
+            if turn_list[0] == "N":
+                movement_list.insert(0, "curva_esquerda")
+
+        if current_orientation == "O":
+            if turn_list[0] == "L":
+                movement_list.insert(0, "mega_curva_direita")
+            if turn_list[0] == "N":
+                movement_list.insert(0, "curva_direita")
+            if turn_list[0] == "S":
+                movement_list.insert(0, "curva_esquerda")
+
+        # print(movement_list)
+        # print(position_list)
+        # print(turn_list)
+    return movement_list, has_seen_obstacle
+
+
+
 def path_to_movement(robot, goal, start=None):
     # as direcoes sao invertidas pois o robo anda de ré
     if start is None:
@@ -307,8 +360,11 @@ def path_to_movement(robot, goal, start=None):
     # print(position_list)
     # print(turn_list)
     i = 0
-
-    for movement in movement_list:
+    loop_counter = 0
+    new_movement_list = movement_list
+    while loop_counter < len(new_movement_list):
+        movement_list = new_movement_list
+        movement = movement_list[loop_counter]
         current_position = position_list[i]
         current_orientation = turn_list[i]
         # print(current_position, current_orientation)
@@ -317,77 +373,36 @@ def path_to_movement(robot, goal, start=None):
         # CHECAGEM DE OBSTACULOS
         #
         robot.ev3_print(robot.back_obstacle_box.read())
-        has_seen_obstacle = False
-        if robot.back_obstacle_box.read() < OBSTACLE_DIST*3:
-            has_seen_obstacle = True
-        if has_seen_obstacle:
-            i = 0
-            # get_closer_to_obstacle_routine(robot)
-
-            city_map_line_list = list(city_map[current_position[0]])
-            city_map_line_list[8] = "X"
-            city_map[current_position[0]] = "".join(city_map_line_list)
-
-            movement_list, position_list, turn_list = set_path_routine(goal, current_position)
-            if current_orientation == "N":
-                if turn_list[0] == "S":
-                    movement_list.insert(0, "mega_curva_direita")
-                if turn_list[0] == "L":
-                    movement_list.insert(0, "curva_direita")
-                if turn_list[0] == "O":
-                    movement_list.insert(0, "curva_esquerda")
-
-            if current_orientation == "S":
-                if turn_list[0] == "N":
-                    movement_list.insert(0, "mega_curva_direita")
-                if turn_list[0] == "O":
-                    movement_list.insert(0, "curva_direita")
-                if turn_list[0] == "L":
-                    movement_list.insert(0, "curva_esquerda")
-
-            if current_orientation == "L":
-                if turn_list[0] == "O":
-                    movement_list.insert(0, "mega_curva_direita")
-                if turn_list[0] == "S":
-                    movement_list.insert(0, "curva_direita")
-                if turn_list[0] == "N":
-                    movement_list.insert(0, "curva_esquerda")
-
-            if current_orientation == "O":
-                if turn_list[0] == "L":
-                    movement_list.insert(0, "mega_curva_direita")
-                if turn_list[0] == "N":
-                    movement_list.insert(0, "curva_direita")
-                if turn_list[0] == "S":
-                    movement_list.insert(0, "curva_esquerda")
-
-            # print(movement_list)
-            # print(position_list)
-            # print(turn_list)
+        # =======
+        
+        # ========
         
         if isinstance(movement, int):
             if movement > 0:
+                new_movement_list, has_seen_obstacle = recalculate_path(robot, current_position, current_orientation, goal)
+                if has_seen_obstacle:
+                    loop_counter = 0
                 robot.pid_walk(cm=movement, speed=-80, fix_errors=True)
             else:
+                recalculate_path(robot, current_position, current_orientation, goal)
                 robot.pid_walk(cm=movement, speed=80, fix_errors=True)
             if abs(movement) == SQUARE_SIZE or movement == 0:
                 i += 1
 
         elif movement == "curva_direita":
             robot.pid_turn(90)
+            recalculate_path(robot, current_position, current_orientation, goal)
 
         elif movement == "curva_esquerda":
             robot.pid_turn(-90)
+            recalculate_path(robot, current_position, current_orientation, goal)
 
         elif movement == "mega_curva_direita":
-            robot.pid_turn(
-                180,
-                # pid=PIDValues(
-                #     kp=2.5,
-                #     ki=0.01,
-                #     kd=6
-                # ),
-                )
+            robot.pid_turn(180)
+            recalculate_path(robot, current_position, current_orientation, goal)
+
+        elif movement == "mega_curva_sem_obs":
+            robot.pid_turn(180)
 
         elif movement == "alinha_atras":
             robot.forward_while_same_reflection(
@@ -412,6 +427,7 @@ def path_to_movement(robot, goal, start=None):
                 sensor_function_r=lambda: robot.color_br.rgb()[2],
                 direction_sign=-1,
             )
+        loop_counter += 1
 
     if goal == ORIGIN_TUPLE:
         # no quadrado da origem apontando as costas para a linha vermelha
