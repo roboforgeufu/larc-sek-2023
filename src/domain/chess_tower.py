@@ -304,6 +304,8 @@ def get_closer_to_obstacle_routine(robot: Robot, direction_sign):
 def go_to_origin_routine(robot: Robot):
     # Apontando pro vermelho
     robot.forward_while_same_reflection(
+        speed_r=40,
+        speed_l=40,
         reflection_diff=22,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],
@@ -311,9 +313,11 @@ def go_to_origin_routine(robot: Robot):
     robot.pid_walk(cm=2, speed=-30)
     robot.pid_align()
     # chega na origem
-    robot.pid_walk(cm=3, speed=-30)
+    robot.pid_walk(cm=5, speed=-30)
     robot.pid_turn(-90)
     robot.forward_while_same_reflection(
+        speed_r=40,
+        speed_l=40,
         reflection_diff=22,
         left_reflection_function=lambda: robot.color_fl.rgb()[2],
         right_reflection_function=lambda: robot.color_fr.rgb()[2],

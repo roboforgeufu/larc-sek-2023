@@ -52,17 +52,18 @@ def calibrate_all_sensors():
 
 def test_calibration():
     brick = EV3Brick()
-    # sensor1 = ColorSensor(Port.S1)
-    # sensor2 = ColorSensor(Port.S2)
-    # sensor3 = ColorSensor(Port.S3)
-    # sensor4 = ColorSensor(Port.S4)
+    sensor1 = ColorSensor(Port.S1)
+    sensor2 = ColorSensor(Port.S2)
+    sensor3 = ColorSensor(Port.S3)
+    sensor4 = ColorSensor(Port.S4)
 
     momo_sensor_3 = ColorSensor(Port.S3)
     while True:
-        # ev3_print("S1:", s1_decision_tree(sensor1.rgb()), ev3=brick)
-        # ev3_print("S2:", s2_decision_tree(sensor2.rgb()), ev3=brick)
-        ev3_print("S3:", momo_s3_decision_tree(momo_sensor_3.rgb()), ev3=brick)
-        # ev3_print("S4:", s4_decision_tree(sensor4.rgb()), ev3=brick)
+        ev3_print("S1:", s1_decision_tree(sensor1.rgb()), ev3=brick)
+        ev3_print("S2:", s2_decision_tree(sensor2.rgb()), ev3=brick)
+        ev3_print("S4:", s4_decision_tree(sensor4.rgb()), ev3=brick)
+        ev3_print("S4:", s4_decision_tree(sensor4.rgb()), ev3=brick)
+        # ev3_print("S3:", momo_s3_decision_tree(momo_sensor_3.rgb()), ev3=brick)
         wait(100)
         brick.screen.clear()
 

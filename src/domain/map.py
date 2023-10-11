@@ -1,12 +1,13 @@
 from math import sqrt
 
-from constants import ORIGIN_TUPLE, SQUARE_SIZE, OBSTACLE_DIST
-from robot import Robot
-from utils import PIDValues, ev3_print
-from domain.chess_tower import go_to_origin_routine, get_closer_to_obstacle_routine
-from copy import copy
-from pybricks.tools import wait
 from pybricks.parameters import Color
+from pybricks.tools import wait
+from constants import ORIGIN_TUPLE, SQUARE_SIZE
+from robot import Robot
+from utils import PIDValues
+from domain.chess_tower import go_to_origin_routine
+from copy import copy
+import constants as const
 # ORIGIN_TUPLE = (8,10)
 # SQUARE_SIZE = 28
 
@@ -161,7 +162,7 @@ def set_path_routine(goal, start):
         (8, 9),
     ]
 
-    path_with_curves, turn_list = find_turns(path_positions_list)
+    path_with_curves = find_turns(path_positions_list)
     path_movements_list = ghost_busters(zero_size_elements, path_with_curves)
 
     i = 0
@@ -182,7 +183,7 @@ def set_path_routine(goal, start):
             ]
             for movement in brown_child_delivery:
                 path_movements_list.append(movement)
-            return path_movements_list, original_positions_list, turn_list
+            return path_movements_list, original_positions_list
 
         first_left_turn_index = path_movements_list.index("curva_esquerda")
         path_movements_list.insert((first_left_turn_index + 1), "alinha_frente")
@@ -201,7 +202,7 @@ def set_path_routine(goal, start):
         alignment_routine = [
             "alinha_frente",
             -5,
-            "mega_curva_sem_obs",
+            "mega_curva_direita",
             "alinha_frente",
             -5,
         ]
@@ -217,7 +218,7 @@ def set_path_routine(goal, start):
             ]
             for movement in brown_child_return:
                 path_movements_list.append(movement)
-            return path_movements_list, original_positions_list, turn_list
+            return path_movements_list, original_positions_list
         path_movements_list = path_movements_list[2:]
         i = (len(path_movements_list)-1)
         while True:
@@ -227,7 +228,7 @@ def set_path_routine(goal, start):
         path_movements_list.insert(i, "alinha_frente")
         path_movements_list.insert(i+1, (-5))
 
-    return path_movements_list, original_positions_list, turn_list
+    return path_movements_list, original_positions_list
 
 
 def ghost_busters(ghosts, busters):
@@ -259,7 +260,6 @@ def find_turns(path_list):
             find_turn_list.append("O")
         i += 1
 
-    original_find_turn_list = copy(find_turn_list)
     i = 0
     while i < (len(find_turn_list) - 1):
         if find_turn_list[i] != find_turn_list[i + 1]:
@@ -295,114 +295,58 @@ def find_turns(path_list):
                     path_list.insert(i + 2, "curva_direita")
                     find_turn_list.insert(i + 1, "curva_direita")
         i += 1
-    return path_list, original_find_turn_list
 
-
-
-def recalculate_path(robot, current_position, current_orientation, goal, position_list):
-    has_seen_obstacle = False
-    movement_list = []
-    if robot.back_obstacle_box.read() < OBSTACLE_DIST*3:
-        has_seen_obstacle = True
-    if has_seen_obstacle:
-        i = 0
-        add = (position_list[i+1][0] - position_list[i][0], position_list[i+1][1] - position_list[i][1])
-        city_map_line_list = list(city_map[current_position[0]+add[0]])
-        city_map_line_list[current_position[1]+add[1]] = "X"
-        city_map[current_position[0]] = "".join(city_map_line_list)
-
-        movement_list, position_list, turn_list = set_path_routine(goal, current_position)
-        if current_orientation == "N":
-            if turn_list[0] == "S":
-                movement_list.insert(0, "mega_curva_direita")
-            if turn_list[0] == "L":
-                movement_list.insert(0, "curva_direita")
-            if turn_list[0] == "O":
-                movement_list.insert(0, "curva_esquerda")
-
-        if current_orientation == "S":
-            if turn_list[0] == "N":
-                movement_list.insert(0, "mega_curva_direita")
-            if turn_list[0] == "O":
-                movement_list.insert(0, "curva_direita")
-            if turn_list[0] == "L":
-                movement_list.insert(0, "curva_esquerda")
-
-        if current_orientation == "L":
-            if turn_list[0] == "O":
-                movement_list.insert(0, "mega_curva_direita")
-            if turn_list[0] == "S":
-                movement_list.insert(0, "curva_direita")
-            if turn_list[0] == "N":
-                movement_list.insert(0, "curva_esquerda")
-
-        if current_orientation == "O":
-            if turn_list[0] == "L":
-                movement_list.insert(0, "mega_curva_direita")
-            if turn_list[0] == "N":
-                movement_list.insert(0, "curva_direita")
-            if turn_list[0] == "S":
-                movement_list.insert(0, "curva_esquerda")
-
-        # print(movement_list)
-        # print(position_list)
-        # print(turn_list)
-    return movement_list, has_seen_obstacle
-
+    return path_list
 
 
 def path_to_movement(robot, goal, start=None):
     # as direcoes sao invertidas pois o robo anda de ré
     if start is None:
         start = ORIGIN_TUPLE
-    movement_list, position_list, turn_list = set_path_routine(goal, start)
-    # print(movement_list)
-    # print(position_list)
-    # print(turn_list)
+    movement_list, position_list = set_path_routine(goal, start)
+    print(movement_list)
+    print(position_list)
     i = 0
-    loop_counter = 0
-    new_movement_list = movement_list
-    while loop_counter < len(new_movement_list):
-        movement_list = new_movement_list
-        movement = movement_list[loop_counter]
+    for movement in movement_list:
         current_position = position_list[i]
-        current_orientation = turn_list[i]
-        # print(current_position, current_orientation)
+        # print(movement, i, current_position)
 
         #
-        # CHECAGEM DE OBSTACULOS
+        # IMPLEMENTAR CHECAGEM DE OBSTACULOS
         #
-        robot.ev3_print(robot.back_obstacle_box.read())
-        # =======
+
+        # appa.stop_mail_box.send(0)
+
+        # PEGAR DO MOOMO A DISTANCIA LIDA PELO SENSOR DE TRÁS PARA DETECTAR OBSTACULO
+        # has_seen_obstacle = True
+        # if has_seen_obstacle:
+        #     get_closer_to_obstacle_routine(robot)
         
-        # ========
-        
+        # appa.stop_mail_box.send(1)
+
         if isinstance(movement, int):
             if movement > 0:
-                new_movement_list, has_seen_obstacle = recalculate_path(robot, current_position, current_orientation, goal)
-                if has_seen_obstacle:
-                    loop_counter = 0
                 robot.pid_walk(cm=movement, speed=-80, fix_errors=True)
             else:
-                recalculate_path(robot, current_position, current_orientation, goal)
                 robot.pid_walk(cm=movement, speed=80, fix_errors=True)
             if abs(movement) == SQUARE_SIZE or movement == 0:
                 i += 1
 
         elif movement == "curva_direita":
             robot.pid_turn(90)
-            recalculate_path(robot, current_position, current_orientation, goal)
 
         elif movement == "curva_esquerda":
             robot.pid_turn(-90)
-            recalculate_path(robot, current_position, current_orientation, goal)
 
         elif movement == "mega_curva_direita":
-            robot.pid_turn(180)
-            recalculate_path(robot, current_position, current_orientation, goal)
-
-        elif movement == "mega_curva_sem_obs":
-            robot.pid_turn(180)
+            robot.pid_turn(
+                180,
+                # pid=PIDValues(
+                #     kp=2.5,
+                #     ki=0.01,
+                #     kd=6
+                # ),
+                )
 
         elif movement == "alinha_atras":
             robot.forward_while_same_reflection(
@@ -427,7 +371,6 @@ def path_to_movement(robot, goal, start=None):
                 sensor_function_r=lambda: robot.color_br.rgb()[2],
                 direction_sign=-1,
             )
-        loop_counter += 1
 
     if goal == ORIGIN_TUPLE:
         # no quadrado da origem apontando as costas para a linha vermelha

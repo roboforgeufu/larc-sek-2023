@@ -6,9 +6,9 @@ import constants as const
 
 def passenger_boarding(robot: Robot):
     robot.pid_turn(30)
-    robot.pid_walk(cm=2, speed=30)
-    robot.pid_line_grabber(PIDValues(target=50, kp=-3.5, ki=-0.05, kd=-10), vel=20, time=3000, sensor=robot.color_fr)
-    robot.pid_walk(cm=4, speed=-30)
+    robot.pid_walk(cm=3, speed=30)
+    robot.pid_line_grabber(PIDValues(target=50, kp=-4.5, ki=-0.05, kd=-10), vel=40, time=3000, sensor=robot.color_fr)
+    robot.pid_walk(cm=7, speed=-30)
 
     robot.stop_mail_box.send(0)
     robot.infra_side_box.wait()
@@ -43,7 +43,7 @@ def passenger_boarding(robot: Robot):
     # comeca multiplas leituras
     robot.stop_mail_box.send(0)
 
-    robot.pid_walk(speed=30, cm=5)
+    robot.pid_walk(speed=30, cm=5.5)
 
     # termina multiplas leituras
     robot.stop_mail_box.send(1)
