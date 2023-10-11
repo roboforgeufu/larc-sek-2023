@@ -74,7 +74,7 @@ def appa_main(appa: Robot):
 
 
 def momo_main(momo: Robot):
-    momo.motor_claw.run_until_stalled(500)
+    momo.motor_claw.run_until_stalled(500, duty_limit=const.CLAW_DUTY_LIMIT)
 
     # 
     # Chess Tower
@@ -110,7 +110,7 @@ def momo_main(momo: Robot):
         # Desembarque pessoas
         #
         momo.stop_mail_box.wait()
-        momo.motor_claw.run_until_stalled(500)
+        momo.motor_claw.run_until_stalled(500, duty_limit=const.CLAW_DUTY_LIMIT)
 
         #
         # Retorno a origem
@@ -130,10 +130,36 @@ def test_appa_main(appa: Robot):
 
 
 def test_momo_main(momo: Robot):
-    momo.motor_claw.run_until_stalled(-500, then=Stop.HOLD)
-    momo.stop_mail_box.send(0)
-    momo.stop_mail_box.wait_new()
-    momo.motor_claw.run_until_stalled(500)
+    pass
+
+
+def teste_calibra_curvas(appa: Robot):
+    pid = PIDValues(
+            kp=0.8,
+            ki=0.01,
+            kd=0.4,
+        )
+    while True:
+        for _ in range(4):
+            appa.pid_turn(90, pid=pid)
+            appa.brick.speaker.beep()
+            wait(500)
+        wait_button_pressed(appa.brick)
+        for _ in range(4):
+            appa.pid_turn(-90, pid=pid)
+            appa.brick.speaker.beep()
+            wait(500)
+        wait_button_pressed(appa.brick)
+        for _ in range(2):
+            appa.pid_turn(180, pid=pid)
+            appa.brick.speaker.beep()
+            wait(500)
+        wait_button_pressed(appa.brick)
+        for _ in range(2):
+            appa.pid_turn(-180, pid=pid)
+            appa.brick.speaker.beep()
+            wait(500)
+
 
 
 def main():

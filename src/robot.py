@@ -190,8 +190,8 @@ class Robot:
 
     def forward_while_same_reflection(
         self,
-        speed_r=60,
-        speed_l=60,
+        speed_r=50,
+        speed_l=50,
         reflection_diff=10,
         obstacle_function=None,
         pid: PIDValues = PIDValues(
@@ -272,9 +272,9 @@ class Robot:
             if abs(diff_ref_r) < reflection_diff:
                 self.motor_r.dc(speed_r - pid_speed)
             elif fix_errors:
+                direction_sign =(speed_r) / abs(speed_r)
                 self.motor_r.dc(
-                    ((speed_r) / abs(speed_r))
-                    * (speed_r + pid_speed + const.FORWARD_SPEED_CORRECTION)
+                    speed_r + pid_speed + (const.FORWARD_SPEED_CORRECTION * direction_sign)
                 )
                 initial_motor_r_angle = self.motor_r.angle()
                 initial_motor_l_angle = self.motor_l.angle()
@@ -442,9 +442,9 @@ class Robot:
         angle,
         mode=1,
         pid: PIDValues = PIDValues(
-            kp=0.6,
+            kp=0.8,
             ki=0.01,
-            kd=0.2,
+            kd=0.4,
         ),
     ):
         """
@@ -576,40 +576,99 @@ class Robot:
     def pid_walk(
         self,
         cm,
-        speed=80,
+        speed=60,
+        obstacle_function=None,
+        fix_errors=False,
     ):
         """Anda em linha reta com controle PID entre os motores."""
 
+        # wait_button_pressed(self.brick)
+        
         degrees = self.cm_to_motor_degrees(cm)
 
         elapsed_time = 0
         i_share = 0
         error = 0
         motor_angle_average = 0
-        self.motor_l.reset_angle(0)
-        self.motor_r.reset_angle(0)
+        initial_left_angle = self.motor_l.angle()
+        imutable_initial_left_angle = self.motor_l.angle()
+        initial_right_angle = self.motor_r.angle()
+        imutable_initial_right_angle = self.motor_r.angle()
         self.stopwatch.reset()
 
-        while abs(motor_angle_average) < abs(degrees):
-            motor_angle_average = (self.motor_l.angle() + self.motor_r.angle()) / 2
+        if speed < 0:
+            right_sensor = self.color_bl
+            left_sensor = self.color_br
+            right_motor = self.motor_l
+            left_motor = self.motor_r
+        else:
+            right_sensor = self.color_fr
+            left_sensor = self.color_fl
+            right_motor = self.motor_r
+            left_motor = self.motor_l
 
-            elapsed_time, i_share, error = self.loopless_pid_walk(
-                elapsed_time, i_share, error, vel=speed
-            )
+
+        initial_left_read = left_sensor.rgb()[2]
+        initial_right_read = right_sensor.rgb()[2]
+
+        left_read_diff = lambda: abs(left_sensor.rgb()[2] - initial_left_read)
+        right_read_diff = lambda: abs(right_sensor.rgb()[2] - initial_right_read)
+
+        has_seen_obstacle = False
+        while abs(motor_angle_average) < abs(degrees):
+            if obstacle_function is not None and obstacle_function():
+                has_seen_obstacle = True
+                break
+            
+            motor_angle_average = ((self.motor_l.angle() - imutable_initial_left_angle) + (self.motor_r.angle() - imutable_initial_right_angle)) / 2
+
+            if fix_errors and right_read_diff() > 22:
+                # Vendo estab. com sensor direito
+                # self.ev3_print(1)
+                direction_sign =(speed) / abs(speed)
+                right_motor.dc(speed + (const.FORWARD_SPEED_CORRECTION * direction_sign))
+                initial_left_angle = self.motor_l.angle()
+                initial_right_angle = self.motor_r.angle()
+
+            if fix_errors and left_read_diff() > 22:
+                # self.ev3_print(2)
+                # Vendo estab. com sensor esquerdo
+                direction_sign =(speed) / abs(speed)
+                left_motor.dc(speed + (const.FORWARD_SPEED_CORRECTION * direction_sign))
+                initial_left_angle = self.motor_l.angle()
+                initial_right_angle = self.motor_r.angle()
+
+            if (
+                not fix_errors or
+                (
+                    (not right_read_diff() > 22) and (not left_read_diff() > 22)
+                )
+            ):
+                # self.ev3_print(3)
+                elapsed_time, i_share, error = self.loopless_pid_walk(
+                    elapsed_time, i_share, error,
+                    vel=speed,
+                    initial_left_angle=initial_left_angle,
+                    initial_right_angle=initial_right_angle,
+                )
 
         self.off_motors()
+        # wait_button_pressed(self.brick)
+        return has_seen_obstacle
 
     def loopless_pid_walk(
         self,
         prev_elapsed_time=0,
         i_share=0,
         prev_error=0,
-        vel=80,
+        vel=60,
         pid: PIDValues = PIDValues(
             kp=3,
             ki=0.2,
             kd=8,
         ),
+        initial_left_angle = 0,
+        initial_right_angle = 0,
     ):
         """
         Controle PID entre os motores sem um loop específico.
@@ -617,7 +676,9 @@ class Robot:
         novos parâmetros (prev_elapsed_time, i_share, prev_error) devidamente
         inicializados a cada iteração.
         """
-        error = self.motor_r.angle() - self.motor_l.angle()
+        error = (self.motor_r.angle() - initial_right_angle) - (
+            self.motor_l.angle() - initial_left_angle
+        )
         p_share = error * pid.kp
 
         if abs(error) < 3:

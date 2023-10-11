@@ -186,8 +186,7 @@ def set_path_routine(goal, start):
         alignment_routine = [
             "alinha_frente",
             -5,
-            "curva_esquerda",
-            "curva_esquerda",
+            "mega_curva_direita",
             "alinha_frente",
             -5,
         ]
@@ -302,9 +301,9 @@ def path_to_movement(robot, goal, start=None):
 
         if isinstance(movement, int):
             if movement > 0:
-                robot.pid_walk(cm=movement, speed=-80)
-            elif movement < 0:
-                robot.pid_walk(cm=movement, speed=80)
+                robot.pid_walk(cm=movement, speed=-80, fix_errors=True)
+            else:
+                robot.pid_walk(cm=movement, speed=80, fix_errors=True)
             if abs(movement) == 28 or movement == 0:
                 i += 1
 
@@ -316,12 +315,12 @@ def path_to_movement(robot, goal, start=None):
 
         elif movement == "mega_curva_direita":
             robot.pid_turn(
-                156,
-                pid=PIDValues(
-                    kp=3.5,
-                    ki=0.01,
-                    kd=10
-                ),
+                180,
+                # pid=PIDValues(
+                #     kp=2.5,
+                #     ki=0.01,
+                #     kd=6
+                # ),
                 )
 
         elif movement == "alinha_atras":
