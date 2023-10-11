@@ -10,7 +10,6 @@ def deliver_person_ahead(robot: Robot):
     while True:
         robot.forward_while_same_reflection(
             reflection_diff=22,
-            avoid_obstacles=False,
             left_reflection_function=lambda: robot.color_fl.rgb()[2],
             right_reflection_function=lambda: robot.color_fr.rgb()[2],
             fix_errors=False,
