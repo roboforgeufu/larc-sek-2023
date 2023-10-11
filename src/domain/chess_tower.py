@@ -77,8 +77,14 @@ def chess_tower(robot: Robot):
         if i % 2 == 0:
             robot.pid_turn(90)
         else:
-            robot.pid_turn(90)
-            robot.pid_turn(90)
+            robot.pid_turn(
+                156,
+                pid=PIDValues(
+                    kp=3.5,
+                    ki=0.01,
+                    kd=10
+                ),
+                )
     
     # robot.stop_mail_box.send(1)
 

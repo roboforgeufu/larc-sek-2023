@@ -147,7 +147,7 @@ def main():
                 color_bl=Port.S3,
                 color_br=Port.S4,
                 color_max_value=65,
-                turn_correction=1.10,
+                turn_correction=0.97,
                 debug=True,
                 is_server=True,
             )

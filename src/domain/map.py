@@ -178,8 +178,7 @@ def set_path_routine(goal, start):
             path_movements_list[i] = (-1) * movement
             i += 1
         path_movements_list.insert((first_left_turn_index + 2), (-5))
-        path_movements_list.insert((first_left_turn_index + 3), "curva_esquerda")
-        path_movements_list.insert((first_left_turn_index + 4), "curva_esquerda")
+        path_movements_list.insert((first_left_turn_index + 3), "mega_curva_direita")
 
     if goal != ORIGIN_TUPLE:
         last_movement_index = len(path_movements_list) - 1
@@ -308,10 +307,23 @@ def path_to_movement(robot, goal, start=None):
                 robot.pid_walk(cm=movement, speed=80)
             if abs(movement) == 28 or movement == 0:
                 i += 1
+
         elif movement == "curva_direita":
             robot.pid_turn(90)
+
         elif movement == "curva_esquerda":
             robot.pid_turn(-90)
+
+        elif movement == "mega_curva_direita":
+            robot.pid_turn(
+                156,
+                pid=PIDValues(
+                    kp=3.5,
+                    ki=0.01,
+                    kd=10
+                ),
+                )
+
         elif movement == "alinha_atras":
             robot.forward_while_same_reflection(
                 reflection_diff=22,
@@ -320,6 +332,7 @@ def path_to_movement(robot, goal, start=None):
             )
             robot.pid_walk(cm=2, speed=-30)
             robot.pid_align()
+           
         elif movement == "alinha_frente":
             robot.forward_while_same_reflection(
                 speed_l=-30,
