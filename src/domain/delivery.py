@@ -64,4 +64,3 @@ def deliver_person_ahead(robot: Robot):
         sensor_function_r=lambda: robot.color_br.rgb()[2],
         direction_sign=-1
     )
-

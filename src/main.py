@@ -59,8 +59,9 @@ def appa_main(appa: Robot):
         appa.ev3_print(passenger_info)
         appa.ev3_print(goal)
 
+        appa.stop_mail_box.send(0)
         path_to_movement(appa, goal)
-
+        appa.stop_mail_box.send(1)
         #
         # Desembarque pessoas
         #
@@ -70,7 +71,7 @@ def appa_main(appa: Robot):
         #
         # Retorno a origem
         #
-
+        appa.stop_mail_box.send(0)
         path_to_movement(appa, const.ORIGIN_TUPLE, start=goal)
         appa.stop_mail_box.send(1)
 
