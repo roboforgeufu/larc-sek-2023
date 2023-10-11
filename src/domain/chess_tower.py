@@ -294,7 +294,8 @@ def get_closer_to_obstacle_routine(robot: Robot, direction_sign):
     robot.pid_walk(cm=2.0, speed=30 * direction_sign)
     last_color = robot.color_fl.color()
     robot.ev3_print(last_color)
-    robot.pid_walk(cm=18, speed=-50 * direction_sign)
+    if last_color != Color.BLUE:
+        robot.pid_walk(cm=11, speed=-50 * direction_sign)
 
     robot.brick.speaker.beep()
     return last_color

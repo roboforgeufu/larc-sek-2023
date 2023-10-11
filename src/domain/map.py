@@ -2,7 +2,7 @@ from math import sqrt
 
 from constants import ORIGIN_TUPLE, SQUARE_SIZE, OBSTACLE_DIST
 from robot import Robot
-from utils import PIDValues
+from utils import PIDValues, ev3_print
 from domain.chess_tower import go_to_origin_routine, get_closer_to_obstacle_routine
 from copy import copy
 from pybricks.tools import wait
@@ -316,13 +316,13 @@ def path_to_movement(robot, goal, start=None):
         #
         # CHECAGEM DE OBSTACULOS
         #
-
+        robot.ev3_print(robot.back_obstacle_box.read())
         has_seen_obstacle = False
-        if robot.box < OBSTACLE_DIST:
+        if robot.back_obstacle_box.read() < OBSTACLE_DIST*3:
             has_seen_obstacle = True
         if has_seen_obstacle:
             i = 0
-            get_closer_to_obstacle_routine(robot)
+            # get_closer_to_obstacle_routine(robot)
 
             city_map_line_list = list(city_map[current_position[0]])
             city_map_line_list[8] = "X"
