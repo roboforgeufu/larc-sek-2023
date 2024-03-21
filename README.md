@@ -1,4 +1,4 @@
-# larc-sek-2022
+# larc-sek-2023
 
 Códigos e materiais da programação para o desafio da categoria SEK (Standard Educational Kit) da LARC (Latin American Robotics Competition) 2023, da equipe RoboForge.
 
