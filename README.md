@@ -19,3 +19,5 @@ No exemplo, enviando todos os arquivos da pasta `src` e da pasta `drafts`.
   "ev3devBrowser.download.include": "{src/**,drafts/**}"
 }
 ```
+
+Isso aqui é uma alteração
